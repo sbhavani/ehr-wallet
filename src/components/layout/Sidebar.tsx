@@ -57,7 +57,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         >
           <div className="p-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h1 className="text-xl font-semibold text-medical-blue">RadiologyAI</h1>
+              <h1 className="text-xl font-semibold text-medical-blue">RadGlobal RIS</h1>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 ✕
               </Button>

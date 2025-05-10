@@ -29,7 +29,7 @@ export const Header = ({
         
         <div className="flex items-center">
           {!isMobile && (
-            <div className="text-xl font-semibold text-medical-blue mr-2">RadiologyAI</div>
+            <div className="text-xl font-semibold text-medical-blue mr-2">RadGlobal RIS</div>
           )}
         </div>
       </div>

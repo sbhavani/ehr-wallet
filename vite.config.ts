@@ -19,8 +19,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
-        name: 'RadiologyAI - Imaging Hub',
-        short_name: 'RadiologyAI',
+        name: 'RadGlobal RIS - Imaging Hub',
+        short_name: 'RadGlobal RIS',
         description: 'Modern radiology information system for patient management and PACS integration',
         theme_color: '#3B82F6',
         icons: [
