@@ -14,6 +14,11 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/index.js"
     ],
+    "/404": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/404.js"
+    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -29,15 +34,15 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/patients.js"
     ],
-    "/patients/register": [
+    "/schedule": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/patients/register.js"
+      "static/chunks/pages/schedule.js"
     ],
-    "/scheduling": [
+    "/settings": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/scheduling.js"
+      "static/chunks/pages/settings.js"
     ]
   },
   "ampFirstPages": []

@@ -33,8 +33,22 @@ export function MobileBottomNav() {
                 route.highlight ? "font-semibold" : ""
               }`}
             >
-              <Icon className={`${route.highlight ? "h-6 w-6" : "h-5 w-5"}`} />
-              <span className="text-xs mt-1">{route.label}</span>
+              <span className={
+                isActive(route.href)
+                  ? "flex items-center justify-center rounded-full bg-primary text-white h-10 w-10 border-2 border-primary shadow-md"
+                  : "flex items-center justify-center h-10 w-10"
+              }>
+                <Icon className={
+                  isActive(route.href)
+                    ? "h-6 w-6 text-white"
+                    : `${route.highlight ? "h-6 w-6" : "h-5 w-5"}`
+                } />
+              </span>
+              <span className={
+                isActive(route.href)
+                  ? "text-xs mt-1 font-semibold text-white drop-shadow-sm"
+                  : "text-xs mt-1 text-gray-500 dark:text-gray-400"
+              }>{route.label}</span>
             </Link>
           );
         })}
