@@ -34,11 +34,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     setMobileNavOpen(!mobileNavOpen);
   };
   
-  const handleSwipeRight = () => {
-    if (isMobile && !mobileNavOpen) {
-      setMobileNavOpen(true);
-    }
-  };
+  // Swipe right to open menu functionality removed as requested
   
   const handleSwipeLeft = () => {
     if (isMobile && mobileNavOpen) {
@@ -63,7 +59,6 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       )}
       
       <TouchSwipe 
-        onSwipeRight={handleSwipeRight} 
         onSwipeLeft={handleSwipeLeft}
         className="min-h-[calc(100vh-4rem)]"
       >
