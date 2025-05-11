@@ -15,8 +15,6 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const routes = [
     { href: "/", label: "Home", icon: Home },
     { href: "/patients", label: "Patients", icon: Users },
-    { href: "/studies", label: "Studies", icon: FileText },
-    { href: "/viewer", label: "PACS Viewer", icon: Image },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
   

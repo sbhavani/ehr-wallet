@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 const Dashboard = () => {
   return (
@@ -22,9 +23,11 @@ const Dashboard = () => {
             <User className="mr-2 h-4 w-4" />
             New Patient
           </Button>
-          <Button variant="outline">
-            <Calendar className="mr-2 h-4 w-4" /> 
-            Schedule Exam
+          <Button variant="outline" asChild>
+            <Link href="/ScheduleExam">
+              <Calendar className="mr-2 h-4 w-4" /> 
+              Schedule Exam
+            </Link>
           </Button>
         </div>
       </div>

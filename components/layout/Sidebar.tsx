@@ -46,8 +46,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { name: "Patient Registration", path: "/patients/register", icon: <User className="w-5 h-5" /> },
     { name: "Patient List", path: "/patients", icon: <Users className="w-5 h-5" /> },
     { name: "Scheduling", path: "/scheduling", icon: <Calendar className="w-5 h-5" /> },
-    { name: "Study Worklist", path: "/studies", icon: <FileSearch className="w-5 h-5" /> },
-    { name: "PACS Viewer", path: "/viewer", icon: <FileCheck className="w-5 h-5" /> },
     { name: "Reports", path: "/reports", icon: <Folder className="w-5 h-5" /> }
   ];
   

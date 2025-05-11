@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/viewer": "pages/viewer.js",
-  "/studies": "pages/studies.js"
+  "/patients": "pages/patients.js",
+  "/ScheduleExam": "pages/ScheduleExam.js",
+  "/patients/register": "pages/patients/register.js"
 }
