@@ -10,9 +10,7 @@ export default function Home() {
         <title>RadGlobal RIS - Imaging Hub</title>
         <meta name="description" content="Modern radiology information system for patient management and PACS integration" />
       </Head>
-      <MainLayout>
-        <Dashboard />
-      </MainLayout>
+      <Dashboard />
     </>
   );
 }

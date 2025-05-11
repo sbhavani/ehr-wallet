@@ -127,7 +127,9 @@ const Dashboard = () => {
             </Card>
           </div>
           <div className="mt-4 flex justify-center">
-            <Button variant="outline" size="sm">View Full Schedule</Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/scheduling">View Full Schedule</Link>
+            </Button>
           </div>
         </TabsContent>
         

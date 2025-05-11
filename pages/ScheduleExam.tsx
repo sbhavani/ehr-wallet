@@ -577,9 +577,7 @@ const ScheduleExam = () => {
         <title>Schedule Exam - RadGlobal RIS</title>
         <meta name="description" content="Schedule a new imaging exam for a patient" />
       </Head>
-      <MainLayout>
-        <ScheduleExamContent />
-      </MainLayout>
+      <ScheduleExamContent />
     </>
   );
 };

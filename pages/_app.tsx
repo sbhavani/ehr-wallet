@@ -11,6 +11,7 @@ import { OfflineIndicator } from "@/components/pwa/OfflineIndicator";
 import { SplashScreen } from "@/components/pwa/SplashScreen";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
 import { usePWA } from "@/hooks/use-pwa";
+import { AppLayout } from "@/components/layout/AppLayout";
 import "@/styles/globals.css";
 
 // Create a client
@@ -52,8 +53,10 @@ export default function App({ Component, pageProps }: AppProps) {
             {/* Show update notification when available */}
             <UpdateNotification />
             
-            {/* Main content */}
-            <Component {...pageProps} />
+            {/* Main content with AppLayout */}
+            <AppLayout>
+              <Component {...pageProps} />
+            </AppLayout>
             
             {/* Show install prompt when appropriate */}
             <InstallPrompt />

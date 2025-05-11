@@ -9,9 +9,7 @@ export default function PatientsPage() {
         <title>Patient List - RadGlobal RIS</title>
         <meta name="description" content="View and manage patients in the RadGlobal RIS system" />
       </Head>
-      <MainLayout>
-        <PatientList />
-      </MainLayout>
+      <PatientList />
     </>
   );
 }

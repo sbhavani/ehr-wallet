@@ -9,9 +9,7 @@ export default function RegisterPage() {
         <title>Register Patient - RadGlobal RIS</title>
         <meta name="description" content="Register new patients in the RadGlobal RIS system" />
       </Head>
-      <MainLayout>
-        <PatientRegister />
-      </MainLayout>
+      <PatientRegister />
     </>
   );
 }
