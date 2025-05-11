@@ -141,26 +141,26 @@ const SchedulingContent = () => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-8">
       {/* Header section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight">Scheduling</h1>
           <p className="text-muted-foreground">View and manage all appointments</p>
         </div>
         
         <div className="flex flex-wrap gap-2">
-          <Button asChild>
+          <Button asChild className="font-semibold px-6 py-2 text-base shadow-md" aria-label="Schedule new exam">
             <Link href="/ScheduleExam">
-              <Calendar className="mr-2 h-4 w-4" /> 
+              <Calendar className="mr-2 h-5 w-5" /> 
               Schedule New Exam
             </Link>
           </Button>
         </div>
       </div>
       
-      {/* Filters and search */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters and search (sticky on scroll) */}
+      <div className="flex flex-col sm:flex-row gap-4 sticky top-0 z-20 bg-background/90 backdrop-blur-md py-2 border-b border-border">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -173,10 +173,10 @@ const SchedulingContent = () => {
         <div className="flex gap-2">
           <Select value={filterModality} onValueChange={setFilterModality}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by modality" />
+              <SelectValue placeholder="Filter by modality" aria-label="Filter by modality" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={"all"}>All Modalities</SelectItem>
+              <SelectItem value={undefined}>All Modalities</SelectItem>
               <SelectItem value="CT">CT</SelectItem>
               <SelectItem value="MRI">MRI</SelectItem>
               <SelectItem value="X-Ray">X-Ray</SelectItem>
@@ -191,7 +191,7 @@ const SchedulingContent = () => {
       </div>
       
       {/* View selector and date navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-20 z-10 bg-background/90 backdrop-blur-md py-2 border-b border-border">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={goToToday}>Today</Button>
           <Button variant="outline" size="icon" onClick={currentView === "day" ? goToPreviousDay : goToPreviousWeek}>
@@ -214,46 +214,46 @@ const SchedulingContent = () => {
           onValueChange={(value) => setCurrentView(value as "day" | "week" | "month")}
           className="w-full"
         >
-          <TabsList>
+          <TabsList className="bg-muted p-1 rounded-lg">
             <TabsTrigger value="day">Day</TabsTrigger>
             <TabsTrigger value="week">Week</TabsTrigger>
           </TabsList>
           
           {/* Day View */}
-          <TabsContent value="day" className="mt-4">
-            <Card>
+          <TabsContent value="day" className="mt-6">
+            <Card className="shadow-lg">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold flex items-center">
-                  <Clock className="mr-2 h-5 w-5 text-primary" />
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
                   {format(currentDate, "EEEE, MMMM d")}
                   {isToday(currentDate) && <Badge className="ml-2">Today</Badge>}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {filteredDayAppointments.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground">
+                  <div className="py-12 text-center text-muted-foreground text-lg">
                     No appointments found for this day
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {filteredDayAppointments.map((appointment) => (
                       <div 
                         key={appointment.id} 
-                        className="flex justify-between items-center p-3 bg-secondary/30 rounded-md hover:bg-secondary/50 transition-colors"
+                        className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors shadow-sm"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="text-center w-16">
-                            <p className="text-sm font-medium">{appointment.time}</p>
+                        <div className="flex items-center gap-4">
+                          <div className="text-center w-20">
+                            <p className="text-base font-semibold">{appointment.time}</p>
                             <p className="text-xs text-muted-foreground">{appointment.duration}min</p>
                           </div>
                           <div>
-                            <p className="font-medium">{appointment.patientName}</p>
+                            <p className="font-semibold text-lg">{appointment.patientName}</p>
                             <p className="text-sm text-muted-foreground">
                               {appointment.modality} - {appointment.bodyPart} - {appointment.doctor}
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
+                        <div className="flex flex-row md:flex-col items-end gap-2 mt-2 md:mt-0">
                           {getStatusBadge(appointment.status)}
                           {appointment.priority !== "routine" && getPriorityBadge(appointment.priority)}
                         </div>
@@ -266,26 +266,29 @@ const SchedulingContent = () => {
           </TabsContent>
           
           {/* Week View */}
-          <TabsContent value="week" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <TabsContent value="week" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 overflow-x-auto">
               {weekDates.map((date) => {
                 const dateAppointments = filteredWeekAppointments.filter(
                   apt => apt.date === format(date, "yyyy-MM-dd")
                 );
-                
                 return (
-                  <Card key={format(date, "yyyy-MM-dd")} className={cn(
-                    isToday(date) && "border-primary"
-                  )}>
+                  <Card key={format(date, "yyyy-MM-dd")}
+                    className={cn(
+                      isToday(date) ? "border-2 border-primary shadow-lg bg-primary/5" : "shadow-sm"
+                    )}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-semibold flex items-center">
+                      <CardTitle className="text-lg font-bold flex items-center gap-2">
                         <span>{format(date, "EEE, MMM d")}</span>
                         {isToday(date) && <Badge className="ml-2">Today</Badge>}
+                        <span className="ml-auto text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {dateAppointments.length} appt{dateAppointments.length !== 1 ? 's' : ''}
+                        </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="max-h-[400px] overflow-y-auto">
                       {dateAppointments.length === 0 ? (
-                        <div className="py-4 text-center text-muted-foreground text-sm">
+                        <div className="py-8 text-center text-muted-foreground text-base">
                           No appointments
                         </div>
                       ) : (
@@ -293,13 +296,13 @@ const SchedulingContent = () => {
                           {dateAppointments.map((appointment) => (
                             <div 
                               key={appointment.id} 
-                              className="p-2 bg-secondary/30 rounded-md hover:bg-secondary/50 transition-colors text-sm"
+                              className="p-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors text-base"
                             >
                               <div className="flex justify-between items-center">
-                                <p className="font-medium">{appointment.time}</p>
+                                <p className="font-semibold">{appointment.time}</p>
                                 {appointment.priority !== "routine" && getPriorityBadge(appointment.priority)}
                               </div>
-                              <p className="font-medium mt-1">{appointment.patientName}</p>
+                              <p className="font-semibold mt-1">{appointment.patientName}</p>
                               <p className="text-xs text-muted-foreground">
                                 {appointment.modality} - {appointment.bodyPart}
                               </p>

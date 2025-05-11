@@ -24,11 +24,6 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/patients/register": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/patients/register.js"
-    ],
     "/scheduling": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
