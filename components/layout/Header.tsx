@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileNav } from "./MobileNav";
 
 export const Header = ({ 
   toggleSidebar,
@@ -37,54 +36,20 @@ export const Header = ({
               className="mr-2" 
               aria-label="Toggle mobile menu"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="h-5 w-5"
-              >
-                {isMobileNavOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                  </>
-                )}
-              </svg>
+              {isMobileNavOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+              <span className="sr-only">Toggle menu</span>
             </Button>
             <div className="text-xl font-semibold text-primary">RadGlobal RIS</div>
           </>
         ) : (
           <>
             <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
+              <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle sidebar</span>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="h-5 w-5"
-              >
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
             </Button>
             <div className="text-xl font-semibold text-primary">RadGlobal RIS</div>
           </>

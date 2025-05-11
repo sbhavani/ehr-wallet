@@ -1,16 +1,15 @@
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Menu, X, Home, Users, FileText, Image, Settings } from "lucide-react";
+import { X, Home, Users, FileText, Image, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface MobileNavProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function MobileNav({ onClose }: MobileNavProps) {
-  const [open, setOpen] = useState(false);
+export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const router = useRouter();
   
   const routes = [
@@ -27,18 +26,14 @@ export function MobileNav({ onClose }: MobileNavProps) {
   
   return (
     <div className="md:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="mr-2">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
+      <Sheet open={isOpen} onOpenChange={(open) => {
+        if (!open) onClose();
+      }}>
         <SheetContent side="left" className="w-[240px] sm:w-[300px]">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between py-2">
               <div className="font-bold text-lg">RadGlobal RIS</div>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+              <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="h-5 w-5" />
                 <span className="sr-only">Close</span>
               </Button>
@@ -56,7 +51,7 @@ export function MobileNav({ onClose }: MobileNavProps) {
                             ? "bg-primary text-primary-foreground"
                             : "hover:bg-muted"
                         }`}
-                        onClick={() => setOpen(false)}
+                        onClick={onClose}
                       >
                         <Icon className="mr-2 h-4 w-4" />
                         {route.label}

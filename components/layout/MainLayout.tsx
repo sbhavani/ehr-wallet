@@ -54,9 +54,12 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         isMobileNavOpen={mobileNavOpen}
       />
       
-      {/* Mobile Navigation Drawer */}
-      {isMobile && mobileNavOpen && (
-        <MobileNav onClose={() => setMobileNavOpen(false)} />
+      {/* Mobile Navigation Drawer - only rendered when open */}
+      {isMobile && (
+        <MobileNav 
+          isOpen={mobileNavOpen} 
+          onClose={() => setMobileNavOpen(false)} 
+        />
       )}
       
       <TouchSwipe 
@@ -64,7 +67,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         onSwipeLeft={handleSwipeLeft}
         className="min-h-[calc(100vh-4rem)]"
       >
-        <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
+        <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)] w-full">
           {/* Desktop Sidebar - hidden on mobile */}
           {!isMobile && (
             <Sidebar isOpen={isOpen} onClose={() => setSidebarOpen(false)} />
@@ -73,8 +76,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           <main 
             className={`
               flex-1 p-4 md:p-6 overflow-y-auto transition-all duration-300
-              ${isMobile ? 'pb-20' : ''} 
-              ${!isMobile && sidebarOpen ? 'md:ml-64' : ''}
+              ${isMobile ? 'pb-20' : ''}
             `}
           >
             {children}

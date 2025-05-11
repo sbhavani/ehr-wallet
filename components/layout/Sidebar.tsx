@@ -136,7 +136,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   return (
     <aside 
       className={cn(
-        "h-[calc(100vh-4rem)] bg-background border-r border-border overflow-y-auto transition-all duration-300",
+        "h-[calc(100vh-4rem)] bg-background border-r border-border overflow-y-auto transition-all duration-300 flex-shrink-0",
         isOpen ? "w-64" : "w-20"
       )}
     >
