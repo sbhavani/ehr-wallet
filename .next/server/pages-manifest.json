@@ -3,9 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/patients/register": "pages/patients/register.js",
-  "/schedule": "pages/schedule.js",
-  "/patients": "pages/patients.js",
-  "/404": "pages/404.js",
-  "/settings": "pages/settings.js"
+  "/scheduling": "pages/scheduling.js",
+  "/patients/register": "pages/patients/register.js"
 }
