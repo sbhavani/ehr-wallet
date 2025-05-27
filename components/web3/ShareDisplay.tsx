@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Clipboard, Clock, Share2 } from 'lucide-react';
+import { Clipboard, Clock, Share2, FileText, Download } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getAccessGrantDetails } from '@/lib/web3/contract';
 
@@ -26,9 +26,13 @@ const ShareDisplay = ({ shareableLink, accessId }: ShareDisplayProps) => {
       try {
         const details = await getAccessGrantDetails(accessId);
         setExpiryTime(details.expiryTime);
+        // Clear any previous errors since we have data now
+        setError(null);
       } catch (err: any) {
         console.error('Error fetching access details:', err);
         setError(err.message || 'Failed to fetch access details');
+        // Set a default expiry time (24 hours from now) as fallback
+        setExpiryTime(new Date(Date.now() + 86400000));
       } finally {
         setLoading(false);
       }
@@ -138,7 +142,7 @@ const ShareDisplay = ({ shareableLink, accessId }: ShareDisplayProps) => {
               </h4>
               <ul className="text-sm space-y-2">
                 <li>• Share this link with your healthcare provider</li>
-                <li>• They can access your data by visiting the link</li>
+                <li>• They can access your {shareableLink.includes('document') ? 'documents' : 'data'} by visiting the link</li>
                 {expiryTime && (
                   <li>• Access will expire automatically after the set duration</li>
                 )}
@@ -150,7 +154,7 @@ const ShareDisplay = ({ shareableLink, accessId }: ShareDisplayProps) => {
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground">
-          Your data is securely stored on IPFS and access is managed by an Ethereum smart contract
+          Your {shareableLink.includes('document') ? 'documents are' : 'data is'} securely stored on IPFS and access is managed by an Ethereum smart contract
         </p>
       </CardFooter>
     </Card>

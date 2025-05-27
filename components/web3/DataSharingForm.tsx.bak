@@ -290,7 +290,6 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 </FormItem>
               )}
             />
-            
             {uploadMode === 'data' && (
               <FormField
                 control={form.control}
@@ -299,46 +298,44 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                   <FormItem>
                     <FormLabel>Data to Share</FormLabel>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                      {dataTypeOptions.map((option) => (
-                        <FormField
-                          key={option.id}
-                          control={form.control}
-                          name="dataTypes"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={option.id}
-                                className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(option.id)}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, option.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== option.id
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {option.label}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            
+                    {dataTypeOptions.map((option) => (
+                      <FormField
+                        key={option.id}
+                        control={form.control}
+                        name="dataTypes"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={option.id}
+                              className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(option.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([...field.value, option.id])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== option.id
+                                          )
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {option.label}
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            )}            
             {uploadMode === 'documents' && (
               <FormField
                 control={form.control}
