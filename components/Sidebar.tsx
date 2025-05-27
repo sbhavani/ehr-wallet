@@ -38,7 +38,7 @@ export default function Sidebar() {
       active: isActive('/patient/access-logs')
     },
     {
-      title: 'Connect Wallet',
+      title: 'Manage Wallet',
       icon: <Wallet className="h-5 w-5" />,
       href: '/patient/wallet',
       active: isActive('/patient/wallet')

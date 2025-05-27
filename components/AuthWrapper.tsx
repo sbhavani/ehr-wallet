@@ -28,6 +28,12 @@ export function AuthWrapper({ children, publicPaths = ['/login'] }: AuthWrapperP
         console.log('Already authenticated, redirecting to dashboard');
         window.location.href = '/';
         return;
+      } else if (user && router.pathname === '/' && user.ethereumAddress) {
+        // If user is authenticated with MetaMask (has ethereumAddress) and trying to access root path
+        // Redirect to patient dashboard
+        console.log('MetaMask user accessing root path, redirecting to patient dashboard');
+        window.location.href = '/patient/dashboard';
+        return;
       }
       
       // Either authenticated and accessing protected route, 

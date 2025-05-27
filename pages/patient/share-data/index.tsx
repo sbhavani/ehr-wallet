@@ -27,6 +27,20 @@ export default function ShareDataPage() {
     setActiveTab('share');
   };
 
+  // Check if session is loaded and user exists
+  if (!session || !session.user) {
+    return (
+      <PatientLayout>
+        <div className="container max-w-4xl mx-auto py-8 px-4">
+          <h1 className="text-3xl font-bold mb-6">Share Your Medical Data</h1>
+          <div className="p-4 border rounded-md bg-yellow-50 text-yellow-800">
+            Please sign in to access data sharing features.
+          </div>
+        </div>
+      </PatientLayout>
+    );
+  }
+
   return (
     <PatientLayout>
       <div className="container max-w-4xl mx-auto py-8 px-4">

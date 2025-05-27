@@ -163,14 +163,9 @@ export default function LoginPage() {
         // Show success message
         toast.success('Successfully connected with MetaMask');
         
-        // Get the callback URL from the query parameters or default to patient dashboard
-        const callbackUrl = Array.isArray(router.query.callbackUrl)
-          ? router.query.callbackUrl[0]
-          : router.query.callbackUrl || '/patient/dashboard';
-        
-        // Add a small delay before redirecting
+        // Always redirect to patient dashboard for MetaMask users
         setTimeout(() => {
-          window.location.href = callbackUrl;
+          window.location.href = '/patient/dashboard';
         }, 100);
         
         return;
