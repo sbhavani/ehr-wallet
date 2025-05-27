@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 // Initial setup - can be run during app installation or first load
-export async function setupOfflineAuth(initialUsers: Array<{email: string, password: string, name?: string, role: 'ADMIN' | 'DOCTOR' | 'STAFF'}>) {
+export async function setupOfflineAuth(initialUsers: Array<{email: string, password: string, name?: string, role: 'ADMIN' | 'DOCTOR' | 'STAFF' | 'PATIENT'}>) {
   try {
     for (const user of initialUsers) {
       // Check if user already exists
@@ -31,12 +31,18 @@ export async function setupOfflineAuth(initialUsers: Array<{email: string, passw
 }
 
 // Function to authenticate a user offline
-export async function authenticateOffline(email: string, password: string): Promise<Omit<UserType, 'password'> | null> {
+export async function authenticateOffline(email: string, password: string, role?: string): Promise<Omit<UserType, 'password'> | null> {
   try {
     const user = await db.users.where('email').equals(email).first();
     
     if (!user || !user.password) {
       console.log('User not found or password not set');
+      return null;
+    }
+    
+    // If role is specified, check if user has the required role
+    if (role && user.role !== role.toUpperCase()) {
+      console.log(`User does not have the required role: ${role}`);
       return null;
     }
     

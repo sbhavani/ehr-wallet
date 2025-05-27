@@ -24,14 +24,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// Define the form schema
-const formSchema = z.object({
+// Define the form schemas
+const staffFormSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
-type FormData = z.infer<typeof formSchema>;
+const patientFormSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+});
+
+type StaffFormData = z.infer<typeof staffFormSchema>;
+type PatientFormData = z.infer<typeof patientFormSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +46,7 @@ export default function LoginPage() {
   const [dbInitializing, setDbInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
   const [isMetaMaskLoading, setIsMetaMaskLoading] = useState(false);
+  const [showEmailPasswordLogin, setShowEmailPasswordLogin] = useState(false);
   
   // Get MetaMask context for wallet integration
   const { isMetaMaskInstalled, currentAccount, connectWallet, isConnected, error: metaMaskError } = useMetaMask();
@@ -60,16 +68,25 @@ export default function LoginPage() {
     initialize();
   }, []);
 
-  // Initialize the form
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  // Initialize the staff form
+  const staffForm = useForm<StaffFormData>({
+    resolver: zodResolver(staffFormSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  async function onSubmit(data: FormData) {
+  // Initialize the patient form
+  const patientForm = useForm<PatientFormData>({
+    resolver: zodResolver(patientFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  async function onStaffSubmit(data: StaffFormData) {
     setIsLoading(true);
     
     try {
@@ -168,10 +185,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background">
-      <Card className="w-full max-w-md">
+    <div className="flex flex-col h-screen w-full items-center justify-center bg-background">
+      <Card className="w-full max-w-md mb-auto mt-auto">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
+          {/* <div className="flex justify-center mb-4">
             <Image 
               src="/default-monochrome.svg" 
               alt="GlobalRad Logo" 
@@ -179,23 +196,23 @@ export default function LoginPage() {
               height={32} 
               className="h-6 w-auto" 
             />
-          </div>
+          </div> */}
           <CardTitle className="text-2xl font-semibold">Login</CardTitle>
           {initError && <p className="text-red-500 text-sm">{initError}</p>}
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="staff" className="w-full">
+          <Tabs defaultValue="patient" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="staff">Staff Login</TabsTrigger>
               <TabsTrigger value="patient">Patient Login</TabsTrigger>
+              <TabsTrigger value="staff">Staff Login</TabsTrigger>
             </TabsList>
             
             {/* Staff Login Tab */}
             <TabsContent value="staff" className="mt-4">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <Form {...staffForm}>
+                <form onSubmit={staffForm.handleSubmit(onStaffSubmit)} className="space-y-4">
                   <FormField
-                    control={form.control}
+                    control={staffForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -213,7 +230,7 @@ export default function LoginPage() {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={staffForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
@@ -249,76 +266,201 @@ export default function LoginPage() {
             {/* Patient Login Tab */}
             <TabsContent value="patient" className="mt-4">
               <div className="space-y-4">
+                {/* Patient Login Options */}
                 <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground mb-2">Connect with your Ethereum wallet to access your medical records</p>
+                  <p className="text-sm text-muted-foreground mb-2">Sign in to access your medical records</p>
                 </div>
-                
-                {/* MetaMask Login Button */}
-                <Button 
-                  onClick={handleMetaMaskLogin} 
-                  className="w-full flex items-center justify-center gap-2" 
-                  disabled={!isMetaMaskInstalled || isMetaMaskLoading}
-                  variant="outline"
-                >
-                  {isMetaMaskLoading ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Image src="/metamask-fox.svg" alt="MetaMask" width={24} height={24} />
-                      <span>Connect with MetaMask</span>
-                    </>
+
+                {/* Web3 Wallet Login - First */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium mb-3">Web3 Wallet Login</h3>
+                  <p className="text-xs text-muted-foreground mb-4">Connect with your Ethereum wallet to access your medical records</p>
+                  
+                  {/* MetaMask Login Button */}
+                  <Button 
+                    onClick={handleMetaMaskLogin} 
+                    className="w-full flex items-center justify-center gap-2" 
+                    disabled={!isMetaMaskInstalled || isMetaMaskLoading}
+                    variant="outline"
+                  >
+                    {isMetaMaskLoading ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                        <span>Connecting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Image src="/metamask-fox.svg" alt="MetaMask" width={24} height={24} />
+                        <span>Connect with MetaMask</span>
+                      </>
+                    )}
+                  </Button>
+                  
+                  {/* Display current account if connected */}
+                  {currentAccount && (
+                    <div className="mt-2 text-center text-sm">
+                      <p className="text-muted-foreground">Connected account:</p>
+                      <p className="font-mono text-xs break-all">{currentAccount}</p>
+                    </div>
                   )}
-                </Button>
-                
-                {/* Display current account if connected */}
-                {currentAccount && (
-                  <div className="mt-2 text-center text-sm">
-                    <p className="text-muted-foreground">Connected account:</p>
-                    <p className="font-mono text-xs break-all">{currentAccount}</p>
+                  
+                  {/* MetaMask not installed warning */}
+                  {!isMetaMaskInstalled && (
+                    <div className="mt-2 text-center text-sm text-amber-500">
+                      <p>MetaMask extension is not installed. Please install it to continue.</p>
+                      <a 
+                        href="https://metamask.io/download/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline mt-1 inline-block"
+                      >
+                        Download MetaMask
+                      </a>
+                    </div>
+                  )}
+                  
+                  {/* Display MetaMask error if any */}
+                  {metaMaskError && (
+                    <div className="mt-2 text-center text-sm text-red-500">
+                      <p>{metaMaskError}</p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-2 text-center text-xs text-muted-foreground bg-muted p-2 rounded">
+                    <p>For demo: use MetaMask with the Ethereum Sepolia testnet</p>
+                    <p className="mt-1">You can get test ETH from the <a href="https://sepoliafaucet.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Sepolia Faucet</a></p>
                   </div>
-                )}
-                
-                {/* MetaMask not installed warning */}
-                {!isMetaMaskInstalled && (
-                  <div className="mt-2 text-center text-sm text-amber-500">
-                    <p>MetaMask extension is not installed. Please install it to continue.</p>
-                    <a 
-                      href="https://metamask.io/download/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline mt-1 inline-block"
-                    >
-                      Download MetaMask
-                    </a>
-                  </div>
-                )}
-                
-                {/* Display MetaMask error if any */}
-                {metaMaskError && (
-                  <div className="mt-2 text-center text-sm text-red-500">
-                    <p>{metaMaskError}</p>
-                  </div>
-                )}
+                </div>
                 
                 <Separator className="my-4" />
                 
-                <div className="text-center text-xs text-muted-foreground bg-muted p-2 rounded">
-                  <p>For demo: use MetaMask with the Ethereum Sepolia testnet</p>
-                  <p className="mt-1">You can get test ETH from the <a href="https://sepoliafaucet.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Sepolia Faucet</a></p>
+                {/* Email/Password Login Form - Collapsible */}
+                <div className="mb-2">
+                  <button 
+                    onClick={() => setShowEmailPasswordLogin(!showEmailPasswordLogin)}
+                    className="flex items-center justify-between w-full text-sm font-medium mb-3 p-2 rounded hover:bg-muted transition-colors"
+                    type="button"
+                  >
+                    <span>Email & Password Login</span>
+                    {showEmailPasswordLogin ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                  
+                  {showEmailPasswordLogin && (
+                  <div className="mt-2 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+                    <Form {...patientForm}>
+                    <form onSubmit={patientForm.handleSubmit(async (data) => {
+                      setIsLoading(true);
+                      
+                      try {
+                        // Use offline authentication with Dexie
+                        const user = await authenticateOffline(data.email, data.password, 'PATIENT');
+                        
+                        if (user) {
+                          // Store auth state for persistent sessions
+                          localStorage.setItem('currentUser', JSON.stringify(user));
+                          
+                          // Get the callback URL from the query parameters or default to patient dashboard
+                          const callbackUrl = Array.isArray(router.query.callbackUrl)
+                            ? router.query.callbackUrl[0]
+                            : router.query.callbackUrl || '/patient/dashboard';
+                            
+                          console.log('Patient authentication successful, redirecting to:', callbackUrl);
+                          
+                          // Add a small delay before redirecting to ensure state is properly set
+                          setTimeout(() => {
+                            // Force a hard navigation instead of client-side routing
+                            window.location.href = callbackUrl;
+                          }, 100);
+                          
+                          return; // Early return to prevent setting isLoading to false
+                        } else {
+                          toast.error('Invalid email or password');
+                          setIsLoading(false);
+                        }
+                      } catch (error) {
+                        toast.error('An error occurred during login');
+                        console.error('Login error:', error);
+                        setIsLoading(false);
+                      }
+                    })} className="space-y-4">
+                      <FormField
+                        control={patientForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="email" 
+                                placeholder="name@example.com" 
+                                {...field} 
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={patientForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="password" 
+                                placeholder="••••••••" 
+                                {...field} 
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? 'Logging in...' : 'Login'}
+                      </Button>
+                    </form>
+                  </Form>
+                  
+                  <div className="mt-2 text-center text-xs text-muted-foreground">
+                    <p>For demo: use patient@example.com / password</p>
+                  </div>
+                  </div>
+                  )}
                 </div>
+                
+
               </div>
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
+        {/* <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             Don&apos;t have an account? Contact your administrator.
           </div>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
+      
+      {/* Footer */}
+      <footer className="w-full py-2 px-4 mt-4 border-t border-border bg-background flex justify-between items-center text-xs text-muted-foreground">
+        <div>
+          © {new Date().getFullYear()} TMC AI, LLC. All rights reserved.
+        </div>
+        <div className="flex gap-4">
+          <Link href="/hipaa" className="hover:text-foreground transition-colors">
+            HIPAA Compliance
+          </Link>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-foreground transition-colors">
+            Terms of Service
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

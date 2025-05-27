@@ -19,7 +19,8 @@ export async function seedOfflineDatabase() {
     await setupOfflineAuth([
       { email: 'admin@example.com', password: 'password', role: 'ADMIN', name: 'Admin User' },
       { email: 'doctor@example.com', password: 'password', role: 'DOCTOR', name: 'Doctor User' },
-      { email: 'staff@example.com', password: 'password', role: 'STAFF', name: 'Staff User' }
+      { email: 'staff@example.com', password: 'password', role: 'STAFF', name: 'Staff User' },
+      { email: 'patient@example.com', password: 'password', role: 'PATIENT', name: 'Patient User' }
     ]);
     
     // Seed sample providers
