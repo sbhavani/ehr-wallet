@@ -1,78 +1,71 @@
 'use client';
 
-import { create } from 'ipfs-http-client';
+import { createHelia } from 'helia';
+import { unixfs } from '@helia/unixfs';
+import { CID } from 'multiformats/cid';
+import { base58btc } from 'multiformats/bases/base58';
+import { json } from '@helia/json';
 
-// Create an IPFS client instance
-const createIpfsClient = () => {
+// Create a Helia instance
+let heliaInstance: any = null;
+
+const createHeliaClient = async () => {
+  if (heliaInstance) {
+    return heliaInstance;
+  }
+
   const projectId = process.env.NEXT_PUBLIC_IPFS_PROJECT_ID;
   const projectSecret = process.env.NEXT_PUBLIC_IPFS_PROJECT_SECRET;
-  const nodeUrl = process.env.NEXT_PUBLIC_IPFS_NODE_URL;
   
-  // If using Infura or a service that requires authentication
+  // Configure Helia with authentication if credentials are available
+  const options: any = {};
+  
   if (projectId && projectSecret) {
-    const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-    return create({
-      host: 'ipfs.infura.io',
-      port: 5001,
-      protocol: 'https',
-      headers: {
-        authorization: auth,
-      },
-    });
+    // Note: Helia has a different configuration approach
+    // This is a simplified example - you may need to adjust based on your IPFS provider
+    options.headers = {
+      authorization: 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64')
+    };
   }
   
-  // If using a public or self-hosted node
-  if (nodeUrl) {
-    const url = new URL(nodeUrl);
-    return create({
-      host: url.hostname,
-      port: parseInt(url.port || '5001'),
-      protocol: url.protocol.replace(':', ''),
-    });
+  try {
+    heliaInstance = await createHelia(options);
+    return heliaInstance;
+  } catch (error) {
+    console.error('Error creating Helia instance:', error);
+    throw new Error('Failed to initialize Helia');
   }
-  
-  throw new Error('IPFS configuration missing');
 };
 
-// Upload data to IPFS
+// Upload data to IPFS using Helia
 export const uploadToIpfs = async (data: any): Promise<string> => {
   try {
-    const ipfs = createIpfsClient();
-    
-    // Convert data to JSON string if it's an object
-    const content = typeof data === 'object' ? JSON.stringify(data) : data;
+    const helia = await createHeliaClient();
+    const jsonStorage = json(helia);
     
     // Add content to IPFS
-    const result = await ipfs.add(content);
+    const cid = await jsonStorage.add(data);
     
-    // Return the CID (Content Identifier)
-    return result.path;
+    // Return the CID (Content Identifier) as a string
+    return cid.toString();
   } catch (error) {
     console.error('Error uploading to IPFS:', error);
     throw error;
   }
 };
 
-// Retrieve data from IPFS
-export const getFromIpfs = async (cid: string): Promise<any> => {
+// Retrieve data from IPFS using Helia
+export const getFromIpfs = async (cidString: string): Promise<any> => {
   try {
-    const ipfs = createIpfsClient();
+    const helia = await createHeliaClient();
+    const jsonStorage = json(helia);
+    
+    // Parse the CID string
+    const cid = CID.parse(cidString);
     
     // Get content from IPFS
-    const chunks = [];
-    for await (const chunk of ipfs.cat(cid)) {
-      chunks.push(chunk);
-    }
-    
-    // Combine chunks and convert to string
-    const content = Buffer.concat(chunks).toString();
-    
-    // Try to parse as JSON, return as string if not valid JSON
-    try {
-      return JSON.parse(content);
-    } catch {
-      return content;
-    }
+    const content = await jsonStorage.get(cid);
+    return content;
   } catch (error) {
     console.error('Error retrieving from IPFS:', error);
     throw error;
@@ -89,6 +82,8 @@ export const getIpfsGatewayUrl = (cid: string): string => {
 export const encryptData = async (data: any, password: string): Promise<string> => {
   // This is a simple encryption for demo purposes
   // In production, use a proper encryption library
+  
+  // Convert data to JSON string
   const jsonData = typeof data === 'object' ? JSON.stringify(data) : data;
   
   // Convert password to key using subtle crypto

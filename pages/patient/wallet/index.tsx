@@ -10,8 +10,7 @@ import { AlertCircle, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
 export default function WalletPage() {
   const { data: session } = useSession();
   const { 
-    connect, 
-    disconnect, 
+    connectWallet, 
     isConnected, 
     currentAccount, 
     chainId, 
@@ -132,14 +131,19 @@ export default function WalletPage() {
             ) : (
               <div className="text-center p-6">
                 <p className="mb-4">No wallet connected</p>
-                <Button onClick={connect}>Connect MetaMask</Button>
+                <Button onClick={connectWallet}>Connect MetaMask</Button>
               </div>
             )}
           </CardContent>
           
           <CardFooter className="flex justify-end">
             {isConnected && (
-              <Button variant="outline" onClick={disconnect}>Disconnect Wallet</Button>
+              <Button variant="outline" onClick={() => {
+                // Manually clear the connection state since there's no disconnect method
+                if (typeof window !== 'undefined') {
+                  window.location.reload();
+                }
+              }}>Disconnect Wallet</Button>
             )}
           </CardFooter>
         </Card>

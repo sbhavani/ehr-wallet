@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import dynamic from 'next/dynamic';
 import PatientLayout from '@/components/layout/PatientLayout';
 import { useMetaMask } from '@/components/web3/MetaMaskProvider';
+import AppleHealthConnect from '@/components/health/AppleHealthConnect';
 
 // Dynamically import components that use browser APIs
 const SharedDataDashboard = dynamic(
@@ -46,12 +47,24 @@ export default function PatientDashboardPage() {
       <Tabs defaultValue="shared-data" className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="shared-data">Shared Data</TabsTrigger>
+          <TabsTrigger value="health-data">Health Data</TabsTrigger>
           <TabsTrigger value="appointments">Appointments</TabsTrigger>
           <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
         </TabsList>
         
         <TabsContent value="shared-data" className="mt-0">
           <SharedDataDashboard ethereumAddress={ethereumAddress} />
+        </TabsContent>
+        
+        <TabsContent value="health-data" className="mt-0">
+          <div className="space-y-6">
+            <AppleHealthConnect 
+              onConnect={(success) => {
+                // Handle connection status
+                console.log('Apple Health connection status:', success);
+              }} 
+            />
+          </div>
         </TabsContent>
         
         <TabsContent value="appointments" className="mt-0">

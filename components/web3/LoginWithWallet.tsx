@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import ConnectWalletButton from './ConnectWalletButton';
 
-// Import your existing login form component or create one
-import LoginForm from '@/components/auth/LoginForm'; // Adjust path as needed
+// Import the existing OfflineLoginForm component
+import { OfflineLoginForm } from '@/components/OfflineLoginForm';
 
 const LoginWithWallet = () => {
   const [activeTab, setActiveTab] = useState('credentials');
@@ -27,7 +27,7 @@ const LoginWithWallet = () => {
             <TabsTrigger value="wallet">Ethereum Wallet</TabsTrigger>
           </TabsList>
           <TabsContent value="credentials" className="mt-4">
-            <LoginForm />
+            <OfflineLoginForm />
           </TabsContent>
           <TabsContent value="wallet" className="mt-4">
             <div className="flex flex-col items-center justify-center py-6">
