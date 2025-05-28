@@ -32,6 +32,28 @@ async function getSharedData(
   session: any
 ) {
   try {
+    // Check if we should return all records (for access logs page)
+    const returnAllRecords = req.query.all === 'true';
+    
+    // For debugging, get all shared data records
+    const allRecords = await prisma.sharedMedicalData.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    
+    console.log(`Total shared data records in database: ${allRecords.length}`);
+    if (allRecords.length > 0) {
+      console.log('Sample record:', JSON.stringify(allRecords[0]));
+    }
+    
+    // If all=true parameter is provided, return all records
+    if (returnAllRecords) {
+      console.log('Returning all shared data records for access logs');
+      return res.status(200).json(allRecords);
+    }
+    
+    // Otherwise, get user-specific records
     // Get the user's ethereum address from the session or query parameter
     let ethereumAddress = session.user?.ethereumAddress;
     
@@ -48,19 +70,6 @@ async function getSharedData(
     const normalizedAddress = ethereumAddress.toLowerCase();
     
     console.log(`Fetching shared data for address: ${normalizedAddress}`);
-    
-    // For debugging, get all shared data records
-    const allRecords = await prisma.sharedMedicalData.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-    
-    console.log(`Total shared data records in database: ${allRecords.length}`);
-    if (allRecords.length > 0) {
-      console.log('Sample record:', JSON.stringify(allRecords[0]));
-    }
     
     // Query the database for shared data records with more flexible matching
     const sharedData = await prisma.sharedMedicalData.findMany({

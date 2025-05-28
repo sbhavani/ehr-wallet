@@ -30,21 +30,39 @@ export default function AccessLogsPage() {
     }
   }, []);
 
-  // Load access logs from API
+  // Load access logs directly from the database
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
         setLoading(true);
-        // Fetch real data from our API endpoint
-        const response = await fetch('/api/access-logs');
+        
+        // Directly fetch all shared data records from the database
+        const response = await fetch('/api/shared-data?all=true');
         
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch access logs');
         }
         
-        const data = await response.json();
-        setAccessLogs(data);
+        const sharedData = await response.json();
+        
+        // Transform the shared data into access logs format
+        const logs = sharedData.map((data: any) => {
+          const dataTypes = data.dataTypes ? data.dataTypes.split(',') : [];
+          return {
+            id: data.accessId,
+            accessedBy: data.userId,
+            accessedAt: new Date(data.createdAt),
+            dataTypes: dataTypes,
+            ipfsCid: data.ipfsCid,
+            status: data.isActive && new Date() < new Date(data.expiryTime) ? 'active' : 'expired',
+            accessCount: data.accessCount || 0,
+            pinStatus: 'pinned'
+          };
+        });
+        
+        console.log('Transformed access logs:', logs);
+        setAccessLogs(logs);
       } catch (err: any) {
         console.error('Error fetching access logs:', err);
         setError(err.message || 'Failed to fetch access logs');
