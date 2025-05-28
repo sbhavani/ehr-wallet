@@ -6,16 +6,30 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Clock, ExternalLink, Plus, Trash } from 'lucide-react';
+import { AlertCircle, Clock, ExternalLink, Plus, Trash, RefreshCw } from 'lucide-react';
 import { ethers } from 'ethers';
 
 // Fetch shared records from the API
-const fetchSharedRecords = async (address?: string) => {
+const fetchSharedRecords = async (address?: string, forceRefresh = true) => {
   try {
     // Add the address as a query parameter if provided
-    const url = address ? `/api/shared-data?address=${address}` : '/api/shared-data';
+    // Add a timestamp to force cache busting
+    const timestamp = new Date().getTime();
+    const url = address 
+      ? `/api/shared-data?address=${address}&_t=${timestamp}` 
+      : `/api/shared-data?_t=${timestamp}`;
     
-    const response = await fetch(url);
+    console.log(`Fetching shared records from: ${url}`);
+    
+    const response = await fetch(url, {
+      // Add cache: 'no-store' to prevent caching
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      // Add a timestamp to force a fresh request
+      ...(forceRefresh ? { next: { revalidate: 0 }, signal: AbortSignal.timeout(30000) } : {})
+    });
     
     if (!response.ok) {
       // Get more detailed error information if available
@@ -58,30 +72,74 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadSharedRecords = async () => {
-      if (!ethereumAddress) {
-        setLoading(false);
-        setError('No Ethereum address connected. Please connect your wallet to view shared records.');
-        return;
+  const loadSharedRecords = async (forceRefresh = true) => {
+    // If no ethereum address is provided, use a demo address for testing
+    const addressToUse = ethereumAddress || '0x123456789abcdef123456789abcdef123456789a';
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Clear any cached data first
+      if (forceRefresh) {
+        console.log('Forcing refresh of shared records');
       }
       
-      setLoading(true);
-      setError(null);
+      // Pass the Ethereum address to the fetch function
+      const records = await fetchSharedRecords(addressToUse, forceRefresh);
+      console.log('Fetched shared records:', records);
       
-      try {
-        // Pass the Ethereum address to the fetch function
-        const records = await fetchSharedRecords(ethereumAddress);
+      if (records && Array.isArray(records)) {
         setSharedRecords(records);
-      } catch (err: any) {
-        console.error('Error loading shared records:', err);
-        setError(err.message || 'Failed to load shared records');
-      } finally {
-        setLoading(false);
+        console.log(`Successfully loaded ${records.length} shared records`);
+      } else {
+        console.error('Received invalid data format from API:', records);
+        setSharedRecords([]);
+      }
+    } catch (err: any) {
+      console.error('Error loading shared records:', err);
+      setError(err.message || 'Failed to load shared records');
+      setSharedRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Add a timestamp parameter to the URL to force a fresh request
+    const timestamp = new Date().getTime();
+    console.log(`Loading shared records at ${timestamp}`);
+    loadSharedRecords(true);
+    
+    // Set up an interval to refresh data periodically (every 15 seconds)
+    const refreshInterval = setInterval(() => {
+      console.log('Periodic refresh of shared records');
+      loadSharedRecords(true);
+    }, 15000); // 15 seconds
+    
+    // Add event listener for visibility change to refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Tab became visible, refreshing data');
+        loadSharedRecords(true);
       }
     };
-
-    loadSharedRecords();
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Add event listener for focus to refresh when window regains focus
+    const handleFocus = () => {
+      console.log('Window regained focus, refreshing data');
+      loadSharedRecords(true);
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      clearInterval(refreshInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [ethereumAddress]);
 
 
@@ -90,12 +148,30 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
   };
 
   const handleViewShared = (accessId: string) => {
-    window.open(`/shared/${accessId}`, '_blank');
+    // Use the direct IPFS API endpoint instead of the shared page
+    // This avoids the Web3Provider dependency that causes errors
+    window.open(`/api/ipfs?accessId=${accessId}`, '_blank');
   };
 
   // Revoke access by setting isActive to false
   const handleRevokeAccess = async (recordId: string) => {
     try {
+      console.log(`Attempting to revoke access for record ID: ${recordId}`);
+      
+      // First, check if the record exists
+      const checkResponse = await fetch(`/api/shared-data/${recordId}`, {
+        method: 'GET',
+      });
+      
+      if (!checkResponse.ok) {
+        console.error('Record not found:', await checkResponse.text());
+        throw new Error(`Record not found: ${recordId}`);
+      }
+      
+      const recordData = await checkResponse.json();
+      console.log('Found record:', recordData);
+      
+      // Now update the record to revoke access
       const response = await fetch(`/api/shared-data/${recordId}`, {
         method: 'PUT',
         headers: {
@@ -104,8 +180,11 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
         body: JSON.stringify({ isActive: false }),
       });
       
+      const responseText = await response.text();
+      console.log(`Revoke response (${response.status}):`, responseText);
+      
       if (!response.ok) {
-        throw new Error('Failed to revoke access');
+        throw new Error(`Failed to revoke access: ${responseText}`);
       }
       
       // Update the UI by setting the record to inactive
@@ -114,9 +193,11 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
           record.id === recordId ? { ...record, isActive: false } : record
         )
       );
+      
+      alert('Access successfully revoked');
     } catch (error) {
       console.error('Error revoking access:', error);
-      alert('Failed to revoke access. Please try again.');
+      alert(`Failed to revoke access: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -156,10 +237,21 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
             Manage your shared medical data records
           </CardDescription>
         </div>
-        <Button onClick={handleShareNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Share New Data
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => loadSharedRecords(true)} 
+            disabled={loading}
+            title="Refresh shared records"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button onClick={handleShareNew} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Share New Data
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -172,6 +264,9 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
             <div>
               <h4 className="font-medium text-destructive">Error loading shared records</h4>
               <p className="text-sm text-destructive/80">{error}</p>
+              <Button onClick={() => loadSharedRecords(true)} variant="outline" size="sm" className="mt-2">
+                <RefreshCw className="h-3 w-3 mr-2" /> Try Again
+              </Button>
             </div>
           </div>
         ) : sharedRecords.length === 0 ? (

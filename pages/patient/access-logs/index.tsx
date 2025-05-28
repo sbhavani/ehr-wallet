@@ -14,25 +14,7 @@ const MetaMaskProvider = dynamic(
   { ssr: false }
 );
 
-// Mock data - in a real implementation, this would come from blockchain events
-const mockAccessLogs = [
-  {
-    id: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    accessedBy: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-    accessedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    dataTypes: ['medical-history', 'lab-results'],
-    ipfsCid: 'QmXyZ123456789abcdef',
-    status: 'active'
-  },
-  {
-    id: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-    accessedBy: '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199',
-    accessedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    dataTypes: ['imaging'],
-    ipfsCid: 'QmAbC987654321defghi',
-    status: 'expired'
-  }
-];
+// We'll fetch real data from the API
 
 export default function AccessLogsPage() {
   const { data: session } = useSession();
@@ -48,13 +30,21 @@ export default function AccessLogsPage() {
     }
   }, []);
 
-  // Load access logs
+  // Load access logs from API
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
-        // In a real implementation, this would fetch data from the blockchain
-        // For now, we'll use mock data
-        setAccessLogs(mockAccessLogs);
+        setLoading(true);
+        // Fetch real data from our API endpoint
+        const response = await fetch('/api/access-logs');
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch access logs');
+        }
+        
+        const data = await response.json();
+        setAccessLogs(data);
       } catch (err: any) {
         console.error('Error fetching access logs:', err);
         setError(err.message || 'Failed to fetch access logs');
@@ -185,10 +175,21 @@ export default function AccessLogsPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => window.open(`https://ipfs.io/ipfs/${log.ipfsCid}`, '_blank')}
+                            title="View on IPFS"
                           >
                             <ExternalLink className="h-4 w-4" />
                             <span className="sr-only">IPFS</span>
                           </Button>
+                          <div className="flex flex-col items-end ml-2">
+                            <span className="text-xs text-muted-foreground">
+                              {log.accessCount} {log.accessCount === 1 ? 'view' : 'views'}
+                            </span>
+                            {log.pinStatus && (
+                              <span className="text-xs text-muted-foreground">
+                                {log.pinStatus === 'pinned' ? 'Active pin' : log.pinStatus}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

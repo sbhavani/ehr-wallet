@@ -248,6 +248,125 @@ export class PinataService {
   public getGatewayUrl(cid: string): string {
     return `${this.gatewayUrl}/${cid}`;
   }
+
+  /**
+   * Get pin list with metadata for all pins or filtered by CID
+   * @param cid - Optional CID to filter by
+   * @returns Pin list data
+   */
+  public async getPinList(cid?: string): Promise<any> {
+    try {
+      if (!this.isConfigured()) {
+        throw new Error('Pinata credentials not configured');
+      }
+      
+      let url = `${this.apiUrl}/pinning/pinList`;
+      
+      // If CID is provided, filter by it
+      if (cid) {
+        url += `?hashContains=${cid}`;
+      }
+      
+      const config = {
+        method: 'get',
+        url,
+        headers: this.getAuthHeaders()
+      };
+      
+      const response = await axios(config);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting pin list:', error);
+      throw new Error(`Failed to get pin list: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Get access statistics for a CID
+   * This uses Pinata's pin by CID endpoint to get metadata about the pin
+   * @param cid - The CID to get statistics for
+   * @returns Access statistics for the CID
+   */
+  public async getCidStats(cid: string): Promise<any> {
+    try {
+      if (!this.isConfigured()) {
+        throw new Error('Pinata credentials not configured');
+      }
+      
+      // First try to get the pin details
+      const pinList = await this.getPinList(cid);
+      
+      if (!pinList.rows || pinList.rows.length === 0) {
+        throw new Error(`CID ${cid} not found in Pinata`);
+      }
+      
+      // Get the pin details
+      const pin = pinList.rows.find((row: any) => row.ipfs_pin_hash === cid);
+      
+      if (!pin) {
+        throw new Error(`CID ${cid} not found in Pinata`);
+      }
+      
+      // Get the pin's metadata
+      const metadata = {
+        name: pin.metadata?.name || 'Unknown',
+        keyvalues: pin.metadata?.keyvalues || {},
+        pinSize: pin.size || 0,
+        pinDate: pin.date_pinned,
+        status: pin.status,
+        regions: pin.regions || []
+      };
+      
+      // For actual access statistics, we would need to use Pinata's Submarine API
+      // which requires a paid plan. For now, we'll return the metadata we have.
+      return {
+        cid,
+        ...metadata,
+        // Estimate access count based on pin date (this is a placeholder)
+        // In a real implementation with Submarine, we would get actual access counts
+        estimatedAccessCount: Math.floor((Date.now() - new Date(pin.date_pinned).getTime()) / (1000 * 60 * 60 * 24)) + 1
+      };
+    } catch (error) {
+      console.error('Error getting CID stats:', error);
+      // Return a default object with zero stats if there's an error
+      return {
+        cid,
+        name: 'Unknown',
+        keyvalues: {},
+        pinSize: 0,
+        pinDate: new Date().toISOString(),
+        status: 'unknown',
+        regions: [],
+        estimatedAccessCount: 0,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
+  /**
+   * Get access logs for multiple CIDs
+   * @param cids - Array of CIDs to get logs for
+   * @returns Access logs for the CIDs
+   */
+  public async getAccessLogs(cids: string[]): Promise<any[]> {
+    const logs = [];
+    
+    for (const cid of cids) {
+      try {
+        const stats = await this.getCidStats(cid);
+        logs.push(stats);
+      } catch (error) {
+        console.error(`Error getting access logs for CID ${cid}:`, error);
+        logs.push({
+          cid,
+          error: error instanceof Error ? error.message : String(error),
+          estimatedAccessCount: 0
+        });
+      }
+    }
+    
+    return logs;
+  }
 }
 
 // Create a singleton instance

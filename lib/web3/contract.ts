@@ -162,14 +162,9 @@ export const getAccessGrantDetails = async (
 export const generateShareableLink = (accessId: string, useProxy: boolean = true): string => {
   const baseUrl = window.location.origin;
   
-  // Standard link to the shared page
-  const sharedPageLink = `${baseUrl}/shared/${accessId}`;
-  
-  // If useProxy is false, return the standard link
-  if (!useProxy) {
-    return sharedPageLink;
-  }
-  
-  // Otherwise, add a query parameter to indicate that the proxy should be used
-  return `${sharedPageLink}?useProxy=true`;
+  // Instead of using the shared page that requires Web3Provider,
+  // use the existing IPFS API endpoint directly with the CID
+  // First, we need to get the CID from the database using the accessId
+  // This will be done client-side when the link is clicked
+  return `${baseUrl}/api/ipfs?accessId=${accessId}`;
 };

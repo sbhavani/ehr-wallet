@@ -42,21 +42,87 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Get the CID from the query parameters
-  const { cid, format = 'raw', responseType = 'auto' } = req.query;
+  // Get the CID or accessId from the query parameters
+  const { cid, accessId, format = 'raw', responseType = 'auto' } = req.query;
+  
+  // If accessId is provided, look up the CID in the database
+  let cidToUse = cid;
+  
+  if (accessId && (!cid || Array.isArray(cid))) {
+    try {
+      // Import prisma client
+      const { prisma } = require('@/lib/prisma');
+      
+      console.log(`Looking up shared data for accessId: ${accessId}`);
+      
+      // Look up the shared data record in the database
+      const sharedData = await prisma.sharedMedicalData.findFirst({
+        where: {
+          accessId: Array.isArray(accessId) ? accessId[0] : accessId,
+          isActive: true,
+        },
+      });
+      
+      // If no record is found, return an error
+      if (!sharedData) {
+        console.log(`No shared data found for accessId: ${accessId}`);
+        return res.status(404).json({ error: 'Shared data not found or access has been revoked' });
+      }
+      
+      // Check if the data has expired
+      const now = new Date();
+      if (now > sharedData.expiryTime) {
+        console.log(`Access has expired for accessId: ${accessId}`);
+        return res.status(403).json({ error: 'Access has expired' });
+      }
+      
+      // Get the IPFS CID from the shared data record
+      cidToUse = sharedData.ipfsCid;
+      console.log(`Found IPFS CID: ${cidToUse} for accessId: ${accessId}`);
+      
+      // Increment the access count
+      await prisma.sharedMedicalData.update({
+        where: {
+          id: sharedData.id,
+        },
+        data: {
+          accessCount: {
+            increment: 1,
+          },
+        },
+      });
+      
+      // If the data is password protected, return a JSON response with metadata
+      if (sharedData.hasPassword) {
+        return res.status(200).json({
+          accessId: sharedData.accessId,
+          ipfsCid: sharedData.ipfsCid,
+          hasPassword: true,
+          expiryTime: sharedData.expiryTime,
+          message: 'This content is password protected. Please use the password to decrypt it.',
+        });
+      }
+    } catch (error) {
+      console.error('Error retrieving shared data:', error);
+      return res.status(500).json({ error: 'Failed to retrieve shared data' });
+    }
+  }
   
   // Validate the CID
-  if (!cid || Array.isArray(cid)) {
+  if (!cidToUse || Array.isArray(cidToUse)) {
     return res.status(400).json({ error: 'Missing IPFS CID parameter' });
   }
   
+  // Make sure cidToUse is a string
+  const cidString = Array.isArray(cidToUse) ? cidToUse[0] : cidToUse;
+  
   // Normalize the CID to determine its version
-  const normalizedCid = normalizeCid(cid);
+  const normalizedCid = normalizeCid(cidString);
   const isCIDv1 = !!normalizedCid.cidv1;
   const isCIDv0 = !!normalizedCid.cidv0;
   
   // Log CID information for debugging
-  console.log(`Processing CID: ${cid}`);
+  console.log(`Processing CID: ${cidString}`);
   console.log(`CID version: ${isCIDv1 ? 'CIDv1' : isCIDv0 ? 'CIDv0' : 'Unknown'}`);
   
   // Special handling for known CIDs with their specific requirements
@@ -78,7 +144,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   };
   
   // Check if this is a known CID
-  const knownCidConfig = knownCids[cid as keyof typeof knownCids];
+  const knownCidConfig = knownCids[cidString as keyof typeof knownCids];
   
   // For CIDv1 format, we need to try specific IPFS API approaches
   // These CIDs often require special handling with the IPFS HTTP API

@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import dynamic from 'next/dynamic';
 import PatientLayout from '@/components/layout/PatientLayout';
@@ -16,6 +17,13 @@ export default function PatientDashboardPage() {
   const { data: session } = useSession();
   const { currentAccount, isConnected } = useMetaMask();
   const [patientSession, setPatientSession] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const router = useRouter();
+  
+  // Function to force refresh of child components
+  const refreshDashboard = useCallback(() => {
+    setRefreshKey(prevKey => prevKey + 1);
+  }, []);
   
   // Get patient session from localStorage if using MetaMask
   useEffect(() => {
@@ -35,6 +43,54 @@ export default function PatientDashboardPage() {
   const userSession = session || patientSession;
   const userName = userSession?.user?.name || 'Patient';
   const ethereumAddress = userSession?.user?.ethereumAddress || currentAccount;
+  
+  // Handle URL query parameters for tab selection and refresh
+  const [activeTab, setActiveTab] = useState('shared-data');
+  
+  // Refresh dashboard when returning to this page or when query parameters change
+  useEffect(() => {
+    const { tab, refresh } = router.query;
+    
+    // Set active tab if specified in URL
+    if (tab && typeof tab === 'string') {
+      setActiveTab(tab);
+    }
+    
+    // Force refresh if refresh=true in URL
+    if (refresh === 'true') {
+      console.log('Refresh triggered by URL parameter');
+      refreshDashboard();
+      
+      // Remove the refresh parameter from URL to prevent repeated refreshes
+      const newQuery = { ...router.query };
+      delete newQuery.refresh;
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: newQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+    
+    const handleRouteChange = (url: string) => {
+      // If returning to dashboard from another page
+      if (url.includes('/patient/dashboard')) {
+        // Small delay to ensure navigation is complete
+        setTimeout(() => refreshDashboard(), 300);
+      }
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChange);
+    
+    // Initial refresh when component mounts
+    refreshDashboard();
+    
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router.query, router.events, router.pathname, refreshDashboard]);
 
   return (
     <PatientLayout>
@@ -44,7 +100,7 @@ export default function PatientDashboardPage() {
           Welcome back, {userName}
         </p>
       
-      <Tabs defaultValue="shared-data" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="shared-data">Shared Data</TabsTrigger>
           <TabsTrigger value="health-data">Health Data</TabsTrigger>
@@ -53,7 +109,10 @@ export default function PatientDashboardPage() {
         </TabsList>
         
         <TabsContent value="shared-data" className="mt-0">
-          <SharedDataDashboard ethereumAddress={ethereumAddress} />
+          <SharedDataDashboard 
+            key={`shared-data-${refreshKey}`} 
+            ethereumAddress={ethereumAddress} 
+          />
         </TabsContent>
         
         <TabsContent value="health-data" className="mt-0">

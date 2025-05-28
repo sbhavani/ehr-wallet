@@ -117,6 +117,26 @@ export default function SharedDataPage() {
         }
       }
       
+      // Record this access in the database
+      try {
+        const recordResponse = await fetch('/api/shared-data/record-access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ accessId }),
+        });
+        
+        if (recordResponse.ok) {
+          console.log('Access recorded successfully');
+        } else {
+          console.warn('Failed to record access:', await recordResponse.json());
+        }
+      } catch (recordError) {
+        console.error('Error recording access:', recordError);
+        // Continue even if recording fails - don't block access to data
+      }
+      
       setSharedData(data);
     } catch (err: any) {
       console.error('Error verifying access:', err);

@@ -286,6 +286,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               dataTypes: values.dataTypes
             };
             
+            addLog(`Sending payload to API: ${JSON.stringify(sharedDataPayload)}`);
+            
             // Call the API to save the shared data
             const response = await fetch('/api/shared-data', {
               method: 'POST',
@@ -293,11 +295,28 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify(sharedDataPayload),
+              // Ensure we don't use cached responses
+              cache: 'no-store'
             });
             
             if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Failed to save shared data');
+              let errorMessage = 'Failed to save shared data';
+              try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+              } catch (e) {
+                // If we can't parse the error response, use the default message
+              }
+              throw new Error(errorMessage);
+            }
+            
+            // Try to get the response data
+            let responseData;
+            try {
+              responseData = await response.json();
+              addLog(`API response: ${JSON.stringify(responseData)}`);
+            } catch (e) {
+              addLog('Could not parse API response, but operation was successful');
             }
             
             addLog('Shared data saved to database successfully');

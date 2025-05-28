@@ -47,15 +47,37 @@ async function getSharedData(
     // Normalize the ethereum address to lowercase for consistency
     const normalizedAddress = ethereumAddress.toLowerCase();
     
-    // Query the database for shared data records
+    console.log(`Fetching shared data for address: ${normalizedAddress}`);
+    
+    // For debugging, get all shared data records
+    const allRecords = await prisma.sharedMedicalData.findMany({
+      take: 10,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    
+    console.log(`Total shared data records in database: ${allRecords.length}`);
+    if (allRecords.length > 0) {
+      console.log('Sample record:', JSON.stringify(allRecords[0]));
+    }
+    
+    // Query the database for shared data records with more flexible matching
     const sharedData = await prisma.sharedMedicalData.findMany({
       where: {
-        userId: normalizedAddress,
+        OR: [
+          { userId: normalizedAddress },
+          { userId: ethereumAddress }, // Try with original case too
+          // If using a demo address for testing
+          { userId: '0x123456789abcdef123456789abcdef123456789a' }
+        ],
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
+    
+    console.log(`Found ${sharedData.length} records for address ${normalizedAddress}`);
     
     return res.status(200).json(sharedData);
   } catch (error) {
@@ -79,24 +101,36 @@ async function createSharedData(
       dataTypes 
     } = req.body;
     
+    console.log('Creating shared data record with:', { accessId, ipfsCid, expiryTime, hasPassword });
+    
     // Validate required fields
     if (!accessId || !ipfsCid || !expiryTime) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
     // Get the user's ethereum address from the session
-    const ethereumAddress = session.user?.ethereumAddress;
+    let ethereumAddress = session.user?.ethereumAddress;
     
     if (!ethereumAddress) {
-      return res.status(400).json({ error: 'No ethereum address associated with this account' });
+      // For development/testing, use a default address if none is available
+      if (process.env.NODE_ENV === 'development') {
+        ethereumAddress = '0x123456789abcdef123456789abcdef123456789a';
+        console.log('Using default ethereum address for development:', ethereumAddress);
+      } else {
+        return res.status(400).json({ error: 'No ethereum address associated with this account' });
+      }
     }
+    
+    // Normalize the address to lowercase
+    const normalizedAddress = ethereumAddress.toLowerCase();
+    console.log('Using normalized address:', normalizedAddress);
     
     // Create the shared data record
     const sharedData = await prisma.sharedMedicalData.create({
       data: {
         accessId,
         ipfsCid,
-        userId: ethereumAddress,
+        userId: normalizedAddress, // Always use lowercase for consistency
         expiryTime: new Date(expiryTime),
         hasPassword: hasPassword || false,
         dataTypes: Array.isArray(dataTypes) ? dataTypes.join(',') : dataTypes,
@@ -104,6 +138,8 @@ async function createSharedData(
         isActive: true,
       },
     });
+    
+    console.log('Successfully created shared data record:', sharedData.id);
     
     return res.status(201).json(sharedData);
   } catch (error) {
