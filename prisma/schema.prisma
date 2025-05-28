@@ -111,3 +111,16 @@ enum AppointmentStatus {
   CANCELLED
   NO_SHOW
 }
+
+model SharedMedicalData {
+  id              String    @id @default(cuid())
+  accessId        String    @unique // The blockchain access ID or hash
+  ipfsCid         String    // IPFS Content Identifier
+  userId          String    // Owner's user ID or ethereum address
+  createdAt       DateTime  @default(now())
+  expiryTime      DateTime  // When the access expires
+  hasPassword     Boolean   @default(false)
+  accessCount     Int       @default(0)
+  dataTypes       String?   // Comma-separated list of data types shared
+  isActive        Boolean   @default(true)
+}

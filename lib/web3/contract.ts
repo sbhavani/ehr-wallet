@@ -159,7 +159,17 @@ export const getAccessGrantDetails = async (
 };
 
 // Generate a shareable link for an access grant
-export const generateShareableLink = (accessId: string): string => {
+export const generateShareableLink = (accessId: string, useProxy: boolean = true): string => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}/shared/${accessId}`;
+  
+  // Standard link to the shared page
+  const sharedPageLink = `${baseUrl}/shared/${accessId}`;
+  
+  // If useProxy is false, return the standard link
+  if (!useProxy) {
+    return sharedPageLink;
+  }
+  
+  // Otherwise, add a query parameter to indicate that the proxy should be used
+  return `${sharedPageLink}?useProxy=true`;
 };

@@ -11,9 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, FileText } from 'lucide-react';
-import { encryptData } from '@/lib/web3/ipfs';
+import { encryptData, uploadToIpfs, checkIpfsAvailability } from '@/lib/web3/ipfs';
+import { pinataService } from '@/lib/web3/pinata';
 import { createAccessGrant, generateShareableLink } from '@/lib/web3/contract';
-import { uploadToIpfs } from '@/lib/web3/ipfs';
 import { FileUpload } from '@/components/ui/file-upload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -192,12 +192,53 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
         addLog('Data prepared successfully');
       }
 
-      // Upload to IPFS
+      // Check IPFS availability and Pinata configuration
+      addLog('Checking IPFS and Pinata availability...');
+      try {
+        // Check if Pinata is configured
+        const isPinataConfigured = pinataService.isConfigured();
+        if (isPinataConfigured) {
+          addLog('Pinata service is configured and will be used as primary IPFS provider.');
+        } else {
+          addLog('Pinata service is not configured. Will use alternative IPFS providers.');
+          
+          // Check other IPFS availability
+          const isIpfsAvailable = await checkIpfsAvailability();
+          if (!isIpfsAvailable) {
+            addLog('WARNING: IPFS service may not be fully available. Will attempt upload with fallbacks.');
+          } else {
+            addLog('IPFS service is available.');
+          }
+        }
+      } catch (error) {
+        addLog('WARNING: Could not verify IPFS availability. Will attempt upload with fallbacks.');
+      }
+      
+      // Upload to IPFS with Pinata prioritized
       addLog('Uploading to IPFS...');
       addLog('Data to upload: ' + (typeof ipfsData === 'string' ? ipfsData.substring(0, 50) + '...' : JSON.stringify(dataToShare).substring(0, 50) + '...'));
       try {
-        const ipfsCid = await uploadToIpfs(ipfsData);
-        addLog(`Successfully uploaded to IPFS with CID: ${ipfsCid}`);
+        let ipfsCid;
+        
+        // Try Pinata first if configured
+        if (pinataService.isConfigured()) {
+          try {
+            addLog('Attempting upload via Pinata...');
+            // Convert string to JSON if needed
+            const jsonData = typeof ipfsData === 'string' ? JSON.parse(ipfsData) : ipfsData;
+            ipfsCid = await pinataService.uploadJSON(jsonData, `Patient-${patientId}-Data-${Date.now()}`);
+            addLog(`Successfully uploaded to IPFS via Pinata with CID: ${ipfsCid}`);
+          } catch (pinataError: any) {
+            addLog(`Pinata upload failed: ${pinataError.message}. Falling back to alternative IPFS providers...`);
+            // Fall back to regular IPFS upload
+            ipfsCid = await uploadToIpfs(ipfsData);
+            addLog(`Successfully uploaded to IPFS with CID: ${ipfsCid} using fallback method`);
+          }
+        } else {
+          // Use regular IPFS upload if Pinata not configured
+          ipfsCid = await uploadToIpfs(ipfsData);
+          addLog(`Successfully uploaded to IPFS with CID: ${ipfsCid}`);
+        }
 
         if (useDirectIpfs) {
           // Direct IPFS approach (no contract)
@@ -225,13 +266,51 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
           addLog(`Access grant created with ID: ${accessId}`);
 
           // Generate shareable link
-          addLog('Generating shareable link...');
           const shareableLink = generateShareableLink(accessId);
-          addLog(`Shareable link generated: ${shareableLink}`);
-
-          // Call success callback
-          addLog('Process completed successfully!');
+          addLog(`Generated shareable link: ${shareableLink}`);
+          
+          // Save the shared data to the database via API
+          try {
+            addLog('Saving shared data to database...');
+            
+            // Calculate expiry time based on duration
+            const durationSeconds = parseInt(values.duration);
+            const expiryTime = new Date(Date.now() + durationSeconds * 1000);
+            
+            // Prepare data for API
+            const sharedDataPayload = {
+              accessId,
+              ipfsCid,
+              expiryTime: expiryTime.toISOString(),
+              hasPassword: values.usePassword,
+              dataTypes: values.dataTypes
+            };
+            
+            // Call the API to save the shared data
+            const response = await fetch('/api/shared-data', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(sharedDataPayload),
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to save shared data');
+            }
+            
+            addLog('Shared data saved to database successfully');
+          } catch (apiError: any) {
+            addLog(`WARNING: Failed to save to database: ${apiError.message}`);
+            console.error('Error saving to database:', apiError);
+            // Continue with the process even if database save fails
+          }
+          
+          // Call the onSuccess callback with the shareable link and access ID
           onSuccess(shareableLink, accessId);
+          
+          addLog('Data sharing process completed successfully!');
         }
       } catch (ipfsError: any) {
         addLog(`IPFS ERROR: ${ipfsError.message || 'Unknown IPFS error'}`);
@@ -239,10 +318,23 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
         console.error('IPFS upload error:', ipfsError);
         throw ipfsError;
       }
-    } catch (err: any) {
-      console.error('Error sharing data:', err);
-      addLog(`ERROR: ${err.message || 'Failed to share data'}`);
-      setError(err.message || 'Failed to share data');
+    } catch (error: any) {
+      console.error('Error in data sharing process:', error);
+      const errorMessage = error.message || 'An unknown error occurred';
+      setError(errorMessage);
+      addLog(`ERROR: ${errorMessage}`);
+      
+      // Provide more helpful messages for specific errors
+      if (errorMessage.includes('404')) {
+        addLog('This appears to be an IPFS connection issue. The IPFS service might be temporarily unavailable.');
+        addLog('Recommendation: Please try again in a few minutes.');
+      } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+        addLog('This appears to be a network connectivity issue.');
+        addLog('Recommendation: Please check your internet connection and try again.');
+      } else if (errorMessage.includes('timeout')) {
+        addLog('The operation timed out. The IPFS service might be slow or overloaded.');
+        addLog('Recommendation: Please try again later with a smaller file or less data.');
+      }
     } finally {
       setIsSubmitting(false);
       addLog('Operation completed');

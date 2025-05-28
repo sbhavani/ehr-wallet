@@ -7,6 +7,8 @@ export default function Document() {
         <meta charSet="UTF-8" />
         <meta name="description" content="Modern radiology information system for patient management and PACS integration" />
         <meta name="author" content="Lovable" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
 
         <meta property="og:title" content="GlobalRad - Imaging Hub" />
         <meta property="og:description" content="Modern radiology information system for patient management and PACS integration" />

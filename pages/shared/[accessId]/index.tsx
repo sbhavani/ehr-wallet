@@ -7,12 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Lock, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useWeb3 } from '@/components/web3/Web3Handler';
 
 // We're using MetaMaskProvider from _app.tsx
 
 export default function SharedDataPage() {
   const router = useRouter();
-  const { accessId } = router.query;
+  const { accessId, useProxy } = router.query;
+  
+  // Get the Web3 context
+  const web3 = useWeb3();
 
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
@@ -29,7 +33,15 @@ export default function SharedDataPage() {
       if (!accessId || typeof accessId !== 'string') return;
       
       try {
-        // We'll handle this in the Web3Handler component
+        // Use the Web3Handler to get access details
+        const details = await web3.getAccessGrantDetails(accessId);
+        setAccessDetails(details);
+        
+        // Set expiry time if available
+        if (details.expiryTime) {
+          setExpiryTime(details.expiryTime);
+        }
+        
         setLoading(false);
       } catch (err: any) {
         console.error('Error fetching access details:', err);
@@ -41,7 +53,7 @@ export default function SharedDataPage() {
     if (accessId) {
       fetchAccessDetails();
     }
-  }, [accessId]);
+  }, [accessId, web3]);
 
   // Calculate time left until expiry
   useEffect(() => {
@@ -85,15 +97,27 @@ export default function SharedDataPage() {
     setError(null);
 
     try {
-      // This will be handled by the Web3Handler component
-      // Mock data for now
-      const mockData = {
-        patientId: 'P12345',
-        createdAt: new Date().toISOString(),
-        dataTypes: ['medical-history', 'lab-results', 'imaging']
-      };
+      // Verify access using the Web3Handler
+      const ipfsCid = await web3.verifyAccess(accessId, passwordInput || undefined);
       
-      setSharedData(mockData);
+      if (!ipfsCid) {
+        throw new Error('Failed to verify access - no IPFS CID returned');
+      }
+      
+      // Fetch the data from IPFS using our proxy if requested
+      let data = await web3.getFromIpfs(ipfsCid);
+      
+      // If the data is encrypted and we have a password, decrypt it
+      if (typeof data === 'string' && passwordInput) {
+        try {
+          data = await web3.decryptData(data, passwordInput);
+        } catch (decryptError) {
+          console.error('Error decrypting data:', decryptError);
+          throw new Error('Invalid password or corrupted data');
+        }
+      }
+      
+      setSharedData(data);
     } catch (err: any) {
       console.error('Error verifying access:', err);
       setError(err.message || 'Failed to verify access');

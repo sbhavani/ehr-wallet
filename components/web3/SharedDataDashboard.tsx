@@ -9,33 +9,43 @@ import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Clock, ExternalLink, Plus, Trash } from 'lucide-react';
 import { ethers } from 'ethers';
 
-// Placeholder for actual blockchain data fetching
-// In a real implementation, you would query events from the smart contract
-const fetchSharedRecords = async (address: string) => {
-  // This is a placeholder - in a real implementation, you would:
-  // 1. Connect to the blockchain
-  // 2. Query AccessCreated events from the smart contract filtered by the user's address
-  // 3. Format and return the data
-  
-  // For demo purposes, return mock data
-  return [
-    {
-      id: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-      ipfsCid: 'QmXyZ123456789abcdef',
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      expiryTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-      hasPassword: true,
-      accessCount: 2
-    },
-    {
-      id: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-      ipfsCid: 'QmAbC987654321defghi',
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-      expiryTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Expired 1 day ago
-      hasPassword: false,
-      accessCount: 5
+// Fetch shared records from the API
+const fetchSharedRecords = async (address?: string) => {
+  try {
+    // Add the address as a query parameter if provided
+    const url = address ? `/api/shared-data?address=${address}` : '/api/shared-data';
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      // Get more detailed error information if available
+      let errorMessage = 'Failed to fetch shared data';
+      try {
+        const errorData = await response.json();
+        if (errorData && errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // If we can't parse the error response, use the default message
+      }
+      
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please ensure you are logged in and have connected your wallet.');
+      }
+      
+      throw new Error(errorMessage);
     }
-  ];
+    
+    const data = await response.json();
+    return data.map((record: any) => ({
+      ...record,
+      createdAt: new Date(record.createdAt),
+      expiryTime: new Date(record.expiryTime)
+    }));
+  } catch (error) {
+    console.error('Error fetching shared records:', error);
+    throw error;
+  }
 };
 
 interface SharedDataDashboardProps {
@@ -52,10 +62,15 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
     const loadSharedRecords = async () => {
       if (!ethereumAddress) {
         setLoading(false);
+        setError('No Ethereum address connected. Please connect your wallet to view shared records.');
         return;
       }
       
+      setLoading(true);
+      setError(null);
+      
       try {
+        // Pass the Ethereum address to the fetch function
         const records = await fetchSharedRecords(ethereumAddress);
         setSharedRecords(records);
       } catch (err: any) {
@@ -69,6 +84,7 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
     loadSharedRecords();
   }, [ethereumAddress]);
 
+
   const handleShareNew = () => {
     router.push('/patient/share-data');
   };
@@ -77,10 +93,31 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
     window.open(`/shared/${accessId}`, '_blank');
   };
 
-  // This would be implemented to call the smart contract to revoke access
-  const handleRevokeAccess = async (accessId: string) => {
-    // Placeholder - would call a smart contract function to revoke access
-    alert(`Revoke access for ${accessId}`);
+  // Revoke access by setting isActive to false
+  const handleRevokeAccess = async (recordId: string) => {
+    try {
+      const response = await fetch(`/api/shared-data/${recordId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isActive: false }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to revoke access');
+      }
+      
+      // Update the UI by setting the record to inactive
+      setSharedRecords(prevRecords => 
+        prevRecords.map(record => 
+          record.id === recordId ? { ...record, isActive: false } : record
+        )
+      );
+    } catch (error) {
+      console.error('Error revoking access:', error);
+      alert('Failed to revoke access. Please try again.');
+    }
   };
 
   // Helper to format time remaining or show expired
@@ -169,8 +206,11 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
                         {record.createdAt.toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={isExpired ? "outline" : "default"} className={isExpired ? "text-muted-foreground" : ""}>
-                          {isExpired ? 'Expired' : 'Active'}
+                        <Badge 
+                          variant={isExpired ? "outline" : record.isActive ? "default" : "secondary"} 
+                          className={isExpired ? "text-muted-foreground" : ""}
+                        >
+                          {isExpired ? 'Expired' : record.isActive ? 'Active' : 'Revoked'}
                         </Badge>
                       </TableCell>
                       <TableCell className="flex items-center gap-1">
@@ -186,8 +226,8 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewShared(record.id)}
-                            disabled={isExpired}
+                            onClick={() => handleViewShared(record.accessId)}
+                            disabled={isExpired || !record.isActive}
                           >
                             <ExternalLink className="h-4 w-4" />
                             <span className="sr-only">View</span>
@@ -196,7 +236,7 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleRevokeAccess(record.id)}
-                            disabled={isExpired}
+                            disabled={isExpired || !record.isActive}
                           >
                             <Trash className="h-4 w-4" />
                             <span className="sr-only">Revoke</span>

@@ -1,5 +1,7 @@
 import { ReactNode, createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { getFromIpfs as fetchFromIpfs, decryptData as decryptIpfsData } from '@/lib/web3/ipfs';
+import { verifyAccess as verifyContractAccess, getAccessGrantDetails as getContractAccessDetails } from '@/lib/web3/contract';
 
 // Create a context for Web3 functionality
 interface Web3ContextType {
@@ -81,53 +83,48 @@ export default function Web3Handler({ children }: Web3HandlerProps) {
     }
   };
 
-  // Mock function for verifying access
+  // Function for verifying access
   const verifyAccess = async (accessId: string, password?: string): Promise<string> => {
-    // In a real implementation, this would call the smart contract
-    console.log(`Verifying access for ${accessId} with password: ${password ? 'provided' : 'not provided'}`);
-    
-    // Mock IPFS CID
-    return 'QmXyZ123456789abcdef';
+    try {
+      // Call the actual contract function
+      return await verifyContractAccess(accessId, password);
+    } catch (error) {
+      console.error('Error verifying access:', error);
+      throw error;
+    }
   };
 
-  // Mock function for getting access grant details
+  // Function for getting access grant details
   const getAccessGrantDetails = async (accessId: string) => {
-    // In a real implementation, this would call the smart contract
-    console.log(`Getting access details for ${accessId}`);
-    
-    // Mock data
-    return {
-      owner: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-      ipfsCid: 'QmXyZ123456789abcdef',
-      expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-      hasPassword: true
-    };
+    try {
+      // Call the actual contract function
+      return await getContractAccessDetails(accessId);
+    } catch (error) {
+      console.error('Error getting access details:', error);
+      throw error;
+    }
   };
 
-  // Mock function for getting data from IPFS
+  // Function for getting data from IPFS
   const getFromIpfs = async (cid: string) => {
-    // In a real implementation, this would fetch from IPFS
-    console.log(`Getting data from IPFS with CID: ${cid}`);
-    
-    // Mock data
-    return {
-      patientId: 'P12345',
-      createdAt: new Date().toISOString(),
-      dataTypes: ['medical-history', 'lab-results', 'imaging']
-    };
+    try {
+      // Use the actual IPFS function
+      return await fetchFromIpfs(cid);
+    } catch (error) {
+      console.error('Error fetching from IPFS:', error);
+      throw error;
+    }
   };
 
-  // Mock function for decrypting data
+  // Function for decrypting data
   const decryptData = async (encryptedData: string, password: string) => {
-    // In a real implementation, this would decrypt the data
-    console.log(`Decrypting data with password: ${password}`);
-    
-    // Return the same mock data
-    return {
-      patientId: 'P12345',
-      createdAt: new Date().toISOString(),
-      dataTypes: ['medical-history', 'lab-results', 'imaging']
-    };
+    try {
+      // Use the actual decryption function
+      return await decryptIpfsData(encryptedData, password);
+    } catch (error) {
+      console.error('Error decrypting data:', error);
+      throw error;
+    }
   };
 
   // Context value
