@@ -1,5 +1,7 @@
 # Health Wallet
 
+[![CI Status](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml) [![Smart Contract Tests](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml) [![Dependency Review](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml)
+
 ## Project Overview
 
 Health Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
