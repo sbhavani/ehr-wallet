@@ -1,36 +1,23 @@
-# GlobalRad RIS
+# Health Wallet
 
 ## Project Overview
 
-GlobalRad RIS (Radiology Information System) is a comprehensive medical imaging management solution designed to streamline radiology workflows, patient record management, and imaging scheduling for healthcare providers.
+Health Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
 
-## Features
+## Key Patient-Centric Features
 
-- **Patient Management**: Complete patient registration, viewing, and editing capabilities with an intuitive interface
-- **Advanced Filtering**: Filter patients by Last Visit date or Date of Birth with a user-friendly calendar interface
-- **Appointment Scheduling**: Comprehensive scheduling system with provider management, appointment types, and time slots
-- **User Authentication**: Secure login and registration system with role-based access control
-- **Responsive Design**: Modern UI that works across devices with a focus on usability
+- **Blockchain-Based Health Records**: Secure, immutable patient records stored with Ethereum and IPFS technologies
+- **Patient Data Ownership**: Complete control over personal health information with granular access permissions
+- **MetaMask Integration**: Connect securely with your Ethereum wallet for identity verification and data access
+- **Selective Data Sharing**: Share specific medical records with authorized providers via smart contracts
+- **Advanced Patient Portal**: View, manage, and track all personal health information through an intuitive interface
+- **Smart Filtering Options**: Filter personal medical history by Last Visit date or Date of Birth with user-friendly calendar interface
+- **Appointment Management**: Schedule and track medical imaging appointments with ease
+- **Responsive Design**: Modern UI that works seamlessly across all devices
 
 ## Getting Started
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory
-cd globalrad-ris
-
-# Step 3: Install the necessary dependencies
-npm install
-
-# Step 4: Start the development server
-npm run dev
-```
 
 ## Access the Application
 
@@ -40,33 +27,57 @@ After starting the development server, you can access the application at:
 http://localhost:3000
 ```
 
+## Web3 Patient Features
+
+### Setting Up Your Health Wallet
+
+1. **Connect Your Wallet**: Use MetaMask or another Ethereum wallet to connect to the platform
+2. **Grant Initial Access**: Approve the connection to establish your Health Wallet identity
+3. **Verify Your Identity**: Complete the secure verification process to ensure data sovereignty
+
+### Managing Your Health Data
+
+1. **Data Access Control**: Manage which healthcare providers can access your records
+2. **View Shared Records**: See a complete history of which providers have accessed your data
+3. **Revoke Access**: Remove access permissions at any time with a simple interface
+
+### Patient Record Sharing
+
+1. **Selective Sharing**: Share only specific medical records or imaging results
+2. **Time-Based Access**: Grant temporary access to providers for limited periods
+3. **Emergency Access**: Special protocols for emergency situations that require immediate data access
+
 ## Tech Stack
 
-This project is built with:
+This project leverages modern web and blockchain technologies:
 
-- **Next.js**: React framework for production-grade applications
-- **TypeScript**: For type safety and better developer experience
-- **Prisma**: ORM for database access
-- **Dexie.js**: IndexedDB wrapper for database access
-- **shadcn/ui**: Component library
+- **Next.js**: React framework providing hybrid static & server rendering
+- **TypeScript**: For type safety and improved developer experience
+- **Ethereum Blockchain**: For secure, verifiable patient record tracking
+- **IPFS**: InterPlanetary File System for decentralized storage of medical data
+- **Web3.js**: JavaScript library interacting with the Ethereum blockchain
+- **MetaMask**: Wallet integration for secure patient authentication
+- **Prisma**: ORM for traditional database access
+- **shadcn/ui**: Modern component library for the user interface
 - **Tailwind CSS**: Utility-first CSS framework
-- **NextAuth.js**: Authentication solution
+- **NextAuth.js**: Authentication solution for traditional login methods
 
 ## Project Structure
 
 - `/pages`: Next.js pages and API routes
-- `/components`: Reusable React components
+- `/components`: Reusable React components including patient data sharing interfaces
+- `/contracts`: Smart contracts for patient data access management
 - `/prisma`: Database schema and migrations
 - `/public`: Static assets
 - `/styles`: Global CSS and Tailwind configuration
-- `/lib`: Utility functions and shared code
+- `/lib`: Utility functions, blockchain integrations, and IPFS clients
 
-## Database Models
+## Data Models
 
-The application includes several key models:
-- Users and authentication
-- Patients and medical records
-- Providers and staff
-- Appointment types
-- Time slots
-- Appointments
+The application manages several key models related to patient data:
+- **User**: Extended with Ethereum address for blockchain identity
+- **Patient**: Core medical information with blockchain references
+- **HealthRecord**: Individual health record entries with IPFS content identifiers
+- **AccessGrant**: Smart contract-based permissions for record access
+- **Appointment**: Scheduled medical imaging appointments
+- **Provider**: Healthcare providers with verified blockchain identities
