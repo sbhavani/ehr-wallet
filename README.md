@@ -85,3 +85,7 @@ The application manages several key models related to patient data:
 - **AccessGrant**: Smart contract-based permissions for record access
 - **Appointment**: Scheduled medical imaging appointments
 - **Provider**: Healthcare providers with verified blockchain identities
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
