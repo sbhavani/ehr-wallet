@@ -89,3 +89,10 @@ The application manages several key models related to patient data:
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
+
+## Maintainers
+
+This project is maintained by:
+
+- [@sbhavani](https://github.com/sbhavani)
+- [@rstellar](https://github.com/rstellar)
