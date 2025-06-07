@@ -435,3 +435,43 @@ export default ViewSharedDataPage;
 *   **Gasless Transactions**: Explore meta-transactions for patients if gas fees are a concern.
 
 This detailed plan provides a roadmap. Each step, especially around security and smart contract development, requires careful attention and expertise.
+
+## 9. Implementation Roadmap (MoSCoW)
+
+### Must Have
+- MetaMask wallet integration for user authentication
+- Smart contract development (`AccessControl.sol`) with core functionality
+- IPFS integration for secure data storage
+- Data encryption/decryption mechanisms
+- Patient data sharing form with basic options
+- QR code/link generation for shared data
+- View shared data page with password validation
+- Security measures for data encryption and access control
+
+### Should Have
+- Push notifications when data is accessed by providers
+- Provider identity verification
+- Enhanced UI/UX for the data sharing workflow
+- Detailed access logs visible to patients
+- Password strength indicators
+- Gasless transactions to improve user experience
+- Comprehensive error handling and user feedback
+- IPFS pinning service integration
+
+### Could Have
+- Access revocation functionality
+- More granular data selection options
+- Multi-language support
+- Dark mode UI
+- Mobile-optimized views
+- Additional authentication methods beyond MetaMask
+- Integration with other popular wallets (WalletConnect)
+- Analytics dashboard for patients to track data sharing
+
+### Won't Have (Current Phase)
+- Direct integration with major EHR systems
+- Support for medical IoT device data
+- Cross-blockchain compatibility
+- Decentralized identity (DID) implementation
+- Health data analytics features
+- Integration with decentralized insurance platforms
