@@ -3,11 +3,15 @@ name: Smart Contract Tests
 on:
   push:
     paths:
+      - 'contracts/**'
       - 'web3/**'
       - '.github/workflows/smart-contract.yml'
+      - '.solhint.json'
   pull_request:
     paths:
+      - 'contracts/**'
       - 'web3/**'
+      - '.solhint.json'
 
 jobs:
   test-contracts:
@@ -32,4 +36,4 @@ jobs:
         run: npx hardhat test || true
       
       - name: Run solidity linter
-        run: npx solhint 'web3/contracts/**/*.sol' || true
+        run: npx solhint 'contracts/**/*.sol' || true
