@@ -94,8 +94,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   
   // Settings links - shown to all users but with different paths
   const settingsLinks = [
-    { name: "Settings", path: userRole === "PATIENT" ? "/patient/settings" : "/settings", icon: <Settings className="w-5 h-5" /> },
-    { name: "Help & Support", path: "/support", icon: <Info className="w-5 h-5" /> }
+    { name: "Settings", path: userRole === "PATIENT" ? "/patient/settings" : "/settings", icon: <Settings className="w-5 h-5" /> }
   ];
   
   // Filter links based on user role
@@ -120,7 +119,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <div className="p-4 border-b border-border">
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-semibold text-primary">
-                {userRole === "PATIENT" ? "Patient Portal" : "GlobalRad"}
+                {userRole === "PATIENT" ? "Health Wallet" : "GlobalRad"}
               </h1>
               {/* Close button removed to avoid duplicate X icons */}
             </div>

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+import { hybridSignIn, hybridWalletLogin } from '@/lib/auth-compatibility';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,6 +44,7 @@ type PatientFormData = z.infer<typeof patientFormSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [dbInitializing, setDbInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
@@ -50,6 +53,17 @@ export default function LoginPage() {
   
   // Get MetaMask context for wallet integration
   const { isMetaMaskInstalled, currentAccount, connectWallet, isConnected, error: metaMaskError } = useMetaMask();
+  
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (session) {
+      const callbackUrl = Array.isArray(router.query.callbackUrl)
+        ? router.query.callbackUrl[0]
+        : router.query.callbackUrl || '/';
+      
+      router.push(callbackUrl);
+    }
+  }, [session, router]);
   
   // Initialize the database and seed if needed
   useEffect(() => {
@@ -90,31 +104,21 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      // Use offline authentication with Dexie
-      const user = await authenticateOffline(data.email, data.password);
+      // Use hybrid authentication that tries NextAuth first, then falls back to offline auth
+      const callbackUrl = Array.isArray(router.query.callbackUrl)
+        ? router.query.callbackUrl[0]
+        : router.query.callbackUrl || '/';
+        
+      const result = await hybridSignIn(data.email, data.password, {
+        redirect: true,
+        callbackUrl,
+      });
       
-      if (user) {
-        // Store auth state for persistent sessions
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        // Get the callback URL from the query parameters or default to '/'
-        const callbackUrl = Array.isArray(router.query.callbackUrl)
-          ? router.query.callbackUrl[0]
-          : router.query.callbackUrl || '/';
-          
-        console.log('Authentication successful, redirecting to:', callbackUrl);
-        
-        // Add a small delay before redirecting to ensure state is properly set
-        setTimeout(() => {
-          // Force a hard navigation instead of client-side routing
-          window.location.href = callbackUrl;
-        }, 100);
-        
-        return; // Early return to prevent setting isLoading to false
-      } else {
+      if (!result.success) {
         toast.error('Invalid email or password');
         setIsLoading(false);
       }
+      // The hybridSignIn handles redirection internally
     } catch (error) {
       toast.error('An error occurred during login');
       console.error('Login error:', error);
@@ -140,43 +144,31 @@ export default function LoginPage() {
     try {
       const account = await connectWallet();
       if (account) {
-        // Store wallet address and create a patient session in localStorage
-        const patientSession = {
-          user: {
-            name: `Patient (${account.substring(0, 6)}...${account.substring(account.length - 4)})`,
-            ethereumAddress: account,
-            role: 'patient'
-          },
-          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
-        };
+        // Use our hybrid login system to authenticate with both systems
+        const callbackUrl = Array.isArray(router.query.callbackUrl)
+          ? router.query.callbackUrl[0]
+          : router.query.callbackUrl || '/patient/dashboard';
         
-        localStorage.setItem('patientWalletAddress', account);
-        localStorage.setItem('patientSession', JSON.stringify(patientSession));
-        localStorage.setItem('currentUser', JSON.stringify({
-          id: `eth-${account}`,
-          name: `Patient (${account.substring(0, 6)}...${account.substring(account.length - 4)})`,
-          email: null,
-          role: 'patient',
-          ethereumAddress: account
-        }));
+        const result = await hybridWalletLogin(account, {
+          redirect: true,
+          callbackUrl
+        });
         
-        // Show success message
-        toast.success('Successfully connected with MetaMask');
-        
-        // Always redirect to patient dashboard for MetaMask users
-        setTimeout(() => {
-          window.location.href = '/patient/dashboard';
-        }, 100);
-        
-        return;
+        if (result.success) {
+          toast.success('Successfully connected with MetaMask');
+          // The hybridWalletLogin will handle redirection
+        } else {
+          toast.error('Failed to authenticate with MetaMask');
+        }
       } else {
         toast.error('Failed to connect with MetaMask');
       }
     } catch (error) {
       console.error('MetaMask login error:', error);
       toast.error('An error occurred during MetaMask login');
+    } finally {
+      setIsMetaMaskLoading(false);
     }
-    setIsMetaMaskLoading(false);
   };
 
   return (
@@ -347,31 +339,22 @@ export default function LoginPage() {
                       setIsLoading(true);
                       
                       try {
-                        // Use offline authentication with Dexie
-                        const user = await authenticateOffline(data.email, data.password, 'PATIENT');
+                        // Use hybrid authentication that tries NextAuth first, then falls back to offline auth
+                        const callbackUrl = Array.isArray(router.query.callbackUrl)
+                          ? router.query.callbackUrl[0]
+                          : router.query.callbackUrl || '/patient/dashboard';
+                          
+                        const result = await hybridSignIn(data.email, data.password, {
+                          redirect: true,
+                          callbackUrl,
+                          role: 'PATIENT'
+                        });
                         
-                        if (user) {
-                          // Store auth state for persistent sessions
-                          localStorage.setItem('currentUser', JSON.stringify(user));
-                          
-                          // Get the callback URL from the query parameters or default to patient dashboard
-                          const callbackUrl = Array.isArray(router.query.callbackUrl)
-                            ? router.query.callbackUrl[0]
-                            : router.query.callbackUrl || '/patient/dashboard';
-                            
-                          console.log('Patient authentication successful, redirecting to:', callbackUrl);
-                          
-                          // Add a small delay before redirecting to ensure state is properly set
-                          setTimeout(() => {
-                            // Force a hard navigation instead of client-side routing
-                            window.location.href = callbackUrl;
-                          }, 100);
-                          
-                          return; // Early return to prevent setting isLoading to false
-                        } else {
+                        if (!result.success) {
                           toast.error('Invalid email or password');
                           setIsLoading(false);
                         }
+                        // The hybridSignIn handles redirection internally
                       } catch (error) {
                         toast.error('An error occurred during login');
                         console.error('Login error:', error);

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { getCurrentUser, logoutUser } from "@/lib/offline-auth";
+import { useSession, signOut } from "next-auth/react";
+import { getCurrentUser } from "@/lib/offline-auth";
+import { hybridSignOut } from "@/lib/auth-compatibility";
 import { useRouter } from "next/router";
 import { 
   DropdownMenu, 
@@ -14,13 +16,19 @@ import { LogOut, User } from "lucide-react";
 
 export function UserAccountNav() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [user, setUser] = useState<any>(null);
   
   useEffect(() => {
-    // Get user from localStorage on client-side
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-  }, []);
+    // First check NextAuth session, then fallback to offline auth
+    if (session?.user) {
+      setUser(session.user);
+    } else {
+      // Fallback to localStorage for offline mode
+      const currentUser = getCurrentUser();
+      if (currentUser) setUser(currentUser);
+    }
+  }, [session]);
   
   if (!user) return null;
   
@@ -63,9 +71,8 @@ export function UserAccountNav() {
         <DropdownMenuItem asChild>
           <button
             className="flex w-full cursor-pointer items-center"
-            onClick={() => {
-              logoutUser();
-              router.push('/login');
+            onClick={async () => {
+              await hybridSignOut('/login');
             }}
           >
             <LogOut className="mr-2 h-4 w-4" />

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Bell, Search, Menu, X } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 import { UserAccountNav } from "@/components/UserAccountNav";
 import { Button } from "@/components/ui/button";
 import { 
@@ -72,7 +73,7 @@ export const Header = ({
               )}
               <span className="sr-only">Toggle menu</span>
             </Button>
-            <div className="text-xl font-semibold text-primary">GlobalRad</div>
+            <div className="text-xl font-semibold text-primary">{isPatient ? "Health Wallet" : "GlobalRad"}</div>
           </>
         ) : (
           <>
@@ -80,7 +81,7 @@ export const Header = ({
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle sidebar</span>
             </Button>
-            <div className="text-xl font-semibold text-primary">GlobalRad</div>
+            <div className="text-xl font-semibold text-primary">{isPatient ? "Health Wallet" : "GlobalRad"}</div>
           </>
         )}
       </div>
@@ -109,10 +110,6 @@ export const Header = ({
           </Button>
         )}
         
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
-        </Button>
         
         <UserAccountNav />
       </div>

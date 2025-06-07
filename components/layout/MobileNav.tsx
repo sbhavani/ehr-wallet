@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 import { X, Home, Users, FileText, Image, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useSession } from "next-auth/react";
+import { useMetaMask } from "@/components/web3/MetaMaskProvider";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -11,7 +14,33 @@ interface MobileNavProps {
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const { isConnected, currentAccount } = useMetaMask();
+  const [patientSession, setPatientSession] = useState<any>(null);
+  const [isPatient, setIsPatient] = useState(false);
   
+  // Check for MetaMask-based patient session in localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedPatientSession = localStorage.getItem('patientSession');
+      if (storedPatientSession) {
+        try {
+          const parsedSession = JSON.parse(storedPatientSession);
+          setPatientSession(parsedSession);
+        } catch (error) {
+          console.error('Error parsing patient session:', error);
+        }
+      }
+    }
+  }, []);
+  
+  // Determine if the user is a patient (either via next-auth or MetaMask)
+  useEffect(() => {
+    const isNextAuthPatient = session?.user?.role?.toUpperCase() === 'PATIENT';
+    const isMetaMaskPatient = isConnected && currentAccount && patientSession?.user?.role === 'patient';
+    setIsPatient(isNextAuthPatient || isMetaMaskPatient);
+  }, [session, isConnected, currentAccount, patientSession]);
+
   const routes = [
     { href: "/", label: "Home", icon: Home },
     { href: "/patients", label: "Patients", icon: Users },
@@ -30,7 +59,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
         <SheetContent side="left" className="w-[240px] sm:w-[300px]">
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between py-2">
-              <div className="font-bold text-lg">GlobalRad</div>
+              <div className="font-bold text-lg">{isPatient ? "Health Wallet" : "GlobalRad"}</div>
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="h-5 w-5" />
                 <span className="sr-only">Close</span>
@@ -61,7 +90,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             </nav>
             <div className="border-t py-4 mt-auto">
               <div className="text-xs text-muted-foreground">
-                <p>GlobalRad v0.1.0</p>
+                <p>{isPatient ? "Health Wallet" : "GlobalRad"} v0.1.0</p>
                 <p className="mt-1">© 2025 RadGlobal</p>
               </div>
             </div>

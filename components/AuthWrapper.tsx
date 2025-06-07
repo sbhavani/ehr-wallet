@@ -1,6 +1,6 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import { getCurrentUser } from '@/lib/offline-auth';
+import { useSession } from 'next-auth/react';
 
 interface AuthWrapperProps {
   children: ReactNode;
@@ -9,41 +9,36 @@ interface AuthWrapperProps {
 
 export function AuthWrapper({ children, publicPaths = ['/login'] }: AuthWrapperProps) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   useEffect(() => {
-    // Check authentication status
-    const checkAuth = () => {
-      const user = getCurrentUser();
-      const isPublicPath = publicPaths.includes(router.pathname);
-      
-      if (!user && !isPublicPath) {
-        // Not authenticated and trying to access protected route
-        console.log('Not authenticated, redirecting to login');
-        window.location.href = `/login?callbackUrl=${encodeURIComponent(router.asPath)}`;
-        return;
-      } else if (user && isPublicPath) {
-        // Authenticated but trying to access login page
-        console.log('Already authenticated, redirecting to dashboard');
-        window.location.href = '/';
-        return;
-      } else if (user && router.pathname === '/' && user.ethereumAddress) {
-        // If user is authenticated with MetaMask (has ethereumAddress) and trying to access root path
-        // Redirect to patient dashboard
-        console.log('MetaMask user accessing root path, redirecting to patient dashboard');
-        window.location.href = '/patient/dashboard';
-        return;
-      }
-      
-      // Either authenticated and accessing protected route, 
-      // or not authenticated and accessing public route
-      setIsAuthenticated(!!user);
-      setIsLoading(false);
-    };
+    // Wait until session status is determined
+    if (status === 'loading') return;
     
-    checkAuth();
-  }, [router.pathname, router.asPath, publicPaths]);
+    const isPublicPath = publicPaths.includes(router.pathname);
+    
+    if (!session && !isPublicPath) {
+      // Not authenticated and trying to access protected route
+      console.log('Not authenticated, redirecting to login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(router.asPath)}`);
+      return;
+    } else if (session && isPublicPath) {
+      // Authenticated but trying to access login page
+      console.log('Already authenticated, redirecting to dashboard');
+      router.push('/');
+      return;
+    } else if (session?.user.role === 'PATIENT' && router.pathname === '/') {
+      // If user is a patient and trying to access root path
+      // Redirect to patient dashboard
+      console.log('Patient user accessing root path, redirecting to patient dashboard');
+      router.push('/patient/dashboard');
+      return;
+    }
+    
+    // Set loading to false once routing decision is made
+    setIsLoading(false);
+  }, [router, session, status, publicPaths]);
   
   // Show loading state while checking authentication
   if (isLoading) {
