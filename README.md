@@ -4,6 +4,10 @@
 
 Health Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
 
+## Product Screenshot
+
+![Health Wallet Dashboard](/public/healthwallet-dashboard.png)
+
 ## Key Patient-Centric Features
 
 - **Blockchain-Based Health Records**: Secure, immutable patient records stored with Ethereum and IPFS technologies
