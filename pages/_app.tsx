@@ -1,3 +1,4 @@
+import "@/lib/crypto-polyfill";
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { SessionWrapper } from "@/components/SessionWrapper";
