@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, FileText } from 'lucide-react';
+import { Loader2, FileText, FlaskConical, Image, Pill, ClipboardList, Clock, Shield, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { encryptData, uploadToIpfs, checkIpfsAvailability } from '@/lib/web3/ipfs';
 import { pinataService } from '@/lib/web3/pinata';
 import { createAccessGrant, generateShareableLink } from '@/lib/web3/contract';
@@ -19,23 +19,61 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Define the form schema
 const formSchema = z.object({
-  dataTypes: z.array(z.string()).min(1, { message: 'Select at least one data type' }),
-  duration: z.string().min(1, { message: 'Duration is required' }),
-  password: z.string().optional(),
+  dataTypes: z.array(z.string()).min(1, { message: 'Please select at least one data type to share' }),
+  duration: z.string().min(1, { message: 'Access duration is required' }),
+  password: z.string()
+    .optional()
+    .refine(
+      (val) => !val || val.length >= 6, 
+      { message: 'Password must be at least 6 characters long' }
+    ),
   usePassword: z.boolean().default(false),
   uploadMode: z.enum(['data', 'documents']).default('data'),
-  documents: z.array(z.any()).optional(),
+  documents: z.array(z.any())
+    .optional()
+    .refine(
+      (val) => !val || val.length > 0, 
+      { message: 'Please upload at least one document' }
+    ),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: 'You must accept the terms to continue',
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Available data types
+// Available data types with descriptions and icons
 const dataTypeOptions = [
-  { id: 'medical-history', label: 'Medical History' },
-  { id: 'lab-results', label: 'Lab Results' },
-  { id: 'imaging', label: 'Imaging & Scans' },
-  { id: 'prescriptions', label: 'Prescriptions' },
-  { id: 'visit-notes', label: 'Visit Notes' },
+  { 
+    id: 'medical-history', 
+    label: 'Medical History',
+    description: 'Share your complete medical history and conditions',
+    icon: 'FileText'
+  },
+  { 
+    id: 'lab-results', 
+    label: 'Lab Results',
+    description: 'Share blood work, urine tests, and other laboratory results',
+    icon: 'FlaskConical'
+  },
+  { 
+    id: 'imaging', 
+    label: 'Imaging & Scans',
+    description: 'Share X-rays, MRIs, CT scans, and other imaging results',
+    icon: 'Image'
+  },
+  { 
+    id: 'prescriptions', 
+    label: 'Prescriptions',
+    description: 'Share current and past medication prescriptions',
+    icon: 'Pill'
+  },
+  { 
+    id: 'visit-notes', 
+    label: 'Visit Notes',
+    description: 'Share doctor visit summaries and clinical notes',
+    icon: 'ClipboardList'
+  },
 ];
 
 // Duration options in seconds
@@ -66,6 +104,7 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
       password: '',
       uploadMode: 'data',
       documents: [],
+      termsAccepted: false,
     },
   });
 
@@ -86,10 +125,24 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
   };
 
   const onSubmit = async (values: FormValues) => {
+    // Reset state
     setIsSubmitting(true);
     setError(null);
     setLogs([]);
     addLog('Starting data sharing process...');
+    
+    // Validate form data
+    if (values.uploadMode === 'documents' && (!uploadedFiles || uploadedFiles.length === 0)) {
+      setError('Please upload at least one document to share');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (values.usePassword && (!values.password || values.password.length < 6)) {
+      setError('Please enter a password with at least 6 characters');
+      setIsSubmitting(false);
+      return;
+    }
     
     // Flag to track if we should use direct IPFS (no contract)
     const useDirectIpfs = !process.env.NEXT_PUBLIC_ACCESS_CONTRACT_ADDRESS;
@@ -340,20 +393,30 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
     } catch (error: any) {
       console.error('Error in data sharing process:', error);
       const errorMessage = error.message || 'An unknown error occurred';
-      setError(errorMessage);
-      addLog(`ERROR: ${errorMessage}`);
       
-      // Provide more helpful messages for specific errors
+      // Provide user-friendly error messages
+      let userFriendlyError = errorMessage;
+      
       if (errorMessage.includes('404')) {
+        userFriendlyError = 'The IPFS service is temporarily unavailable. Please try again in a few minutes.';
         addLog('This appears to be an IPFS connection issue. The IPFS service might be temporarily unavailable.');
         addLog('Recommendation: Please try again in a few minutes.');
       } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+        userFriendlyError = 'Network connection issue. Please check your internet connection and try again.';
         addLog('This appears to be a network connectivity issue.');
         addLog('Recommendation: Please check your internet connection and try again.');
       } else if (errorMessage.includes('timeout')) {
+        userFriendlyError = 'The operation timed out. Please try again with a smaller file or less data.';
         addLog('The operation timed out. The IPFS service might be slow or overloaded.');
         addLog('Recommendation: Please try again later with a smaller file or less data.');
+      } else if (errorMessage.includes('MetaMask')) {
+        userFriendlyError = 'There was an issue with your wallet connection. Please make sure MetaMask is installed and unlocked.';
+      } else if (errorMessage.includes('password')) {
+        userFriendlyError = 'There was an issue with the password protection. Please try a different password.';
       }
+      
+      setError(userFriendlyError);
+      addLog(`ERROR: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
       addLog('Operation completed');
@@ -369,13 +432,29 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
       reader.onerror = error => reject(error);
     });
   };
+  
+  // Helper function to reset the form
+  const resetForm = () => {
+    form.reset({
+      dataTypes: [],
+      duration: '86400', // Default to 1 day
+      usePassword: false,
+      password: '',
+      uploadMode: 'data',
+      documents: [],
+      termsAccepted: false,
+    });
+    setUploadedFiles([]);
+    setError(null);
+    setLogs([]);
+  };
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Share Medical Data</CardTitle>
-        <CardDescription>
-          Share your medical data or documents securely using blockchain and IPFS
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold">Share Your Medical Data</CardTitle>
+        <CardDescription className="text-base">
+          Securely share your medical data or documents with healthcare providers using encryption and blockchain technology
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -408,43 +487,71 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 name="dataTypes"
                 render={() => (
                   <FormItem>
-                    <FormLabel>Data to Share</FormLabel>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                      {dataTypeOptions.map((option) => (
-                        <FormField
-                          key={option.id}
-                          control={form.control}
-                          name="dataTypes"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={option.id}
-                                className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(option.id)}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, option.id])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== option.id
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {option.label}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
+                    <FormLabel className="text-base font-semibold">Select Data Types to Share</FormLabel>
+                    <FormDescription className="mb-4">
+                      Choose which types of medical data you want to share with your healthcare provider
+                    </FormDescription>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                      {dataTypeOptions.map((option) => {
+                        // Get the icon component based on the icon name
+                        let IconComponent;
+                        switch(option.icon) {
+                          case 'FileText': IconComponent = FileText; break;
+                          case 'FlaskConical': IconComponent = FlaskConical; break;
+                          case 'Image': IconComponent = Image; break;
+                          case 'Pill': IconComponent = Pill; break;
+                          case 'ClipboardList': IconComponent = ClipboardList; break;
+                          default: IconComponent = FileText;
+                        }
+                        
+                        return (
+                          <FormField
+                            key={option.id}
+                            control={form.control}
+                            name="dataTypes"
+                            render={({ field }) => {
+                              const isSelected = field.value?.includes(option.id);
+                              return (
+                                <FormItem
+                                  key={option.id}
+                                  className={`flex flex-col rounded-lg border p-4 transition-all ${isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
+                                >
+                                  <div className="flex items-start space-x-3">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={(checked) => {
+                                          return checked
+                                            ? field.onChange([...field.value, option.id])
+                                            : field.onChange(
+                                                field.value?.filter(
+                                                  (value) => value !== option.id
+                                                )
+                                              );
+                                        }}
+                                        className="mt-1"
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <div className="flex items-center">
+                                        <IconComponent className="h-4 w-4 mr-2 text-primary" />
+                                        <FormLabel className="font-medium text-base">
+                                          {option.label}
+                                        </FormLabel>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">
+                                        {option.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        );
+                      })}
                     </div>
-                    <FormMessage />
+                    <FormMessage className="mt-2" />
                   </FormItem>
                 )}
               />
@@ -456,7 +563,13 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 name="documents"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Upload Documents</FormLabel>
+                    <FormLabel className="text-base font-semibold flex items-center">
+                      <FileText className="h-4 w-4 mr-2 text-primary" />
+                      Upload Medical Documents
+                    </FormLabel>
+                    <FormDescription className="mb-2">
+                      Upload medical documents, reports, or images to share securely
+                    </FormDescription>
                     <FormControl>
                       <FileUpload
                         onChange={(files) => {
@@ -468,12 +581,20 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                         maxFiles={5}
                         maxSize={20} // 20MB
                         accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                        className="mt-2"
+                        className="mt-2 border-2 border-dashed rounded-lg p-6 bg-muted/20"
                       />
                     </FormControl>
-                    <FormDescription>
-                      Upload medical documents, reports, or images to share securely
-                    </FormDescription>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full flex items-center">
+                          <FileText className="h-3 w-3 mr-1" />
+                          {file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name}
+                          <span className="ml-1 text-muted-foreground">
+                            ({(file.size / 1024).toFixed(0)} KB)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -485,13 +606,19 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               name="duration"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Access Duration</FormLabel>
+                  <FormLabel className="text-base font-semibold flex items-center">
+                    <Clock className="h-4 w-4 mr-2 text-primary" />
+                    Access Duration
+                  </FormLabel>
+                  <FormDescription className="mb-2">
+                    Set how long the recipient will have access to your data
+                  </FormDescription>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select duration" />
                       </SelectTrigger>
                     </FormControl>
@@ -503,9 +630,6 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    The recipient will have access for this duration
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -515,19 +639,21 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               control={form.control}
               name="usePassword"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-lg bg-muted/30">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      className="mt-1"
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>
+                    <FormLabel className="font-medium flex items-center">
+                      <Shield className="h-4 w-4 mr-2 text-primary" />
                       Require password for access
                     </FormLabel>
                     <FormDescription>
-                      Add an extra layer of security with a password
+                      Add an extra layer of security with a password. You'll need to share this password separately with the recipient.
                     </FormDescription>
                   </div>
                 </FormItem>
@@ -539,17 +665,25 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter a secure password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Share this password with the recipient separately
+                  <FormItem className="bg-muted/20 p-4 rounded-lg border border-dashed">
+                    <FormLabel className="text-base font-semibold">Set Access Password</FormLabel>
+                    <FormDescription className="mb-2">
+                      Create a password that the recipient will need to access your data
+                    </FormDescription>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter a secure password (min. 6 characters)"
+                          className="pr-10"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Shield className="h-4 w-4 absolute right-3 top-3 text-muted-foreground" />
+                    </div>
+                    <FormDescription className="mt-2 text-amber-600 flex items-center">
+                      <Info className="h-4 w-4 mr-2" />
+                      You must share this password with the recipient separately
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -557,35 +691,98 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               />
             )}
 
+            <FormField
+              control={form.control}
+              name="termsAccepted"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-6">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      I understand and agree to share my medical data
+                    </FormLabel>
+                    <FormDescription>
+                      By checking this box, you confirm that you understand how your data will be shared and accessed
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
             {error && (
-              <div className="text-sm font-medium text-destructive">{error}</div>
+              <div className="p-4 rounded-lg bg-destructive/10 text-destructive flex items-start space-x-3 mt-4">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Error sharing data</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
             )}
 
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Share Data'
-              )}
-            </Button>
+            <div className="flex gap-4 mt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={resetForm}
+                disabled={isSubmitting} 
+                className="flex-none"
+              >
+                Reset Form
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="flex-1 py-6 text-base font-medium"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processing your request...
+                  </>
+                ) : (
+                  <>
+                    Share {uploadMode === 'documents' ? 'Documents' : 'Medical Data'} Securely
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {isSubmitting && (
+              <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm font-medium mb-2 flex items-center">
+                  <Info className="h-4 w-4 mr-2 text-primary" />
+                  Processing Your Request
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Please wait while we securely encrypt and upload your data. This may take a moment depending on the amount of data being shared.
+                </p>
+              </div>
+            )}
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-4 w-full">
-        <div className="flex justify-between w-full">
-          <p className="text-xs text-muted-foreground">
-            Your {uploadMode === 'documents' ? 'documents' : 'data'} will be encrypted and stored on IPFS with access managed by a smart contract
-          </p>
+      <CardFooter className="flex flex-col space-y-4 w-full border-t pt-6">
+        <div className="flex justify-between w-full items-center">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-4 w-4 text-primary" />
+            <p className="text-sm text-muted-foreground">
+              Your {uploadMode === 'documents' ? 'documents' : 'data'} will be encrypted and stored securely with blockchain-based access control
+            </p>
+          </div>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setShowLogs(!showLogs)}
-            className="text-xs"
+            className="text-xs flex items-center gap-1"
           >
-            {showLogs ? 'Hide Logs' : 'Show Logs'}
+            <Info className="h-3 w-3" />
+            {showLogs ? 'Hide Technical Logs' : 'Show Technical Logs'}
           </Button>
         </div>
         
