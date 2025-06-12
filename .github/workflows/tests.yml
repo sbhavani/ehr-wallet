@@ -13,15 +13,15 @@ jobs:
     # Set up environment variables for the entire job
     env:
       # Database connection
-      DATABASE_URL: "${{ secrets.DATABASE_URL }}"
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
       # Pinata API keys
-      NEXT_PUBLIC_PINATA_API_KEY: "${{ secrets.NEXT_PUBLIC_PINATA_API_KEY }}"
-      NEXT_PUBLIC_PINATA_SECRET_API_KEY: "${{ secrets.NEXT_PUBLIC_PINATA_SECRET_API_KEY }}"
-      NEXT_PUBLIC_PINATA_JWT: "${{ secrets.NEXT_PUBLIC_PINATA_JWT }}"
+      NEXT_PUBLIC_PINATA_API_KEY: ${{ secrets.NEXT_PUBLIC_PINATA_API_KEY }}
+      NEXT_PUBLIC_PINATA_SECRET_API_KEY: ${{ secrets.NEXT_PUBLIC_PINATA_SECRET_API_KEY }}
+      NEXT_PUBLIC_PINATA_JWT: ${{ secrets.NEXT_PUBLIC_PINATA_JWT }}
       # Other required environment variables
-      NEXTAUTH_URL: "${{ secrets.NEXTAUTH_URL }}"
-      NEXTAUTH_SECRET: "${{ secrets.NEXTAUTH_SECRET }}"
-      NEXT_PUBLIC_APP_URL: "${{ secrets.NEXT_PUBLIC_APP_URL }}"
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
 
     steps:
     - uses: actions/checkout@v3
