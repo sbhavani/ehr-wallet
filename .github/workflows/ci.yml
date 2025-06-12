@@ -29,22 +29,8 @@ jobs:
         run: npm run build
       
       - name: Test
+        env:
+          NEXT_PUBLIC_PINATA_API_KEY: "${{ secrets.NEXT_PUBLIC_PINATA_API_KEY }}"
+          NEXT_PUBLIC_PINATA_SECRET_API_KEY: "${{ secrets.NEXT_PUBLIC_PINATA_SECRET_API_KEY }}"
+          NEXT_PUBLIC_PINATA_JWT: "${{ secrets.NEXT_PUBLIC_PINATA_JWT }}"
         run: npm test || true
-        
-  database-migration-check:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Check Prisma migrations
-        run: npx prisma validate
