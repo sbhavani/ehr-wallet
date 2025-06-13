@@ -8,6 +8,8 @@ import PatientLayout from '@/components/layout/PatientLayout';
 import { useMetaMask } from '@/components/web3/MetaMaskProvider';
 import AppleHealthConnect from '@/components/health/AppleHealthConnect';
 import Head from 'next/head';
+import { initDatabase } from '@/lib/db';
+import { seedOfflineDatabase } from '@/lib/seed-offline-db';
 
 // Dynamically import components that use browser APIs
 const SharedDataDashboard = dynamic(
@@ -21,10 +23,29 @@ export default function Home() {
   const [patientSession, setPatientSession] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
+  const [dbInitializing, setDbInitializing] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
   
   // Function to force refresh of child components
   const refreshDashboard = useCallback(() => {
     setRefreshKey(prevKey => prevKey + 1);
+  }, []);
+  
+  // Initialize the database and seed if needed
+  useEffect(() => {
+    async function initialize() {
+      try {
+        await initDatabase();
+        await seedOfflineDatabase();
+        setDbInitializing(false);
+      } catch (error) {
+        console.error('Failed to initialize database:', error);
+        setInitError('Failed to initialize the offline database. Please reload the page.');
+        setDbInitializing(false);
+      }
+    }
+    
+    initialize();
   }, []);
   
   // Get patient session from localStorage if using MetaMask
@@ -93,6 +114,43 @@ export default function Home() {
       router.events.off('routeChangeComplete', handleRouteChange);
     };
   }, [router.query, router.events, router.pathname, refreshDashboard]);
+
+  // Show loading state while database is initializing
+  if (dbInitializing) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-4 text-center">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Initializing offline database...</h1>
+            <p className="text-muted-foreground">Please wait while we set up your local database.</p>
+          </div>
+          <div className="flex justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if initialization failed
+  if (initError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-4 text-center">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-red-500">Database Error</h1>
+            <p className="text-muted-foreground">{initError}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
