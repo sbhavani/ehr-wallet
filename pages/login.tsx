@@ -24,22 +24,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// Define the form schemas
-const staffFormSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-});
-
+// Define the form schema
 const patientFormSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
-type StaffFormData = z.infer<typeof staffFormSchema>;
 type PatientFormData = z.infer<typeof patientFormSchema>;
 
 export default function LoginPage() {
@@ -82,15 +75,6 @@ export default function LoginPage() {
     initialize();
   }, []);
 
-  // Initialize the staff form
-  const staffForm = useForm<StaffFormData>({
-    resolver: zodResolver(staffFormSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
   // Initialize the patient form
   const patientForm = useForm<PatientFormData>({
     resolver: zodResolver(patientFormSchema),
@@ -100,31 +84,7 @@ export default function LoginPage() {
     },
   });
 
-  async function onStaffSubmit(data: StaffFormData) {
-    setIsLoading(true);
-    
-    try {
-      // Use hybrid authentication that tries NextAuth first, then falls back to offline auth
-      const callbackUrl = Array.isArray(router.query.callbackUrl)
-        ? router.query.callbackUrl[0]
-        : router.query.callbackUrl || '/';
-        
-      const result = await hybridSignIn(data.email, data.password, {
-        redirect: true,
-        callbackUrl,
-      });
-      
-      if (!result.success) {
-        toast.error('Invalid email or password');
-        setIsLoading(false);
-      }
-      // The hybridSignIn handles redirection internally
-    } catch (error) {
-      toast.error('An error occurred during login');
-      console.error('Login error:', error);
-      setIsLoading(false);
-    }
-  }
+
 
   // Show loading state while database is initializing
   if (dbInitializing) {
@@ -188,70 +148,13 @@ export default function LoginPage() {
           {initError && <p className="text-red-500 text-sm">{initError}</p>}
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="patient" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="patient">Patient Login</TabsTrigger>
-              <TabsTrigger value="staff">Staff Login</TabsTrigger>
-            </TabsList>
+          <div className="w-full">
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-semibold">Patient Login</h2>
+              <p className="text-sm text-muted-foreground">Sign in to access your medical records</p>
+            </div>
             
-            {/* Staff Login Tab */}
-            <TabsContent value="staff" className="mt-4">
-              <Form {...staffForm}>
-                <form onSubmit={staffForm.handleSubmit(onStaffSubmit)} className="space-y-4">
-                  <FormField
-                    control={staffForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="name@example.com" 
-                            {...field} 
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={staffForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="••••••••" 
-                            {...field} 
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </form>
-              </Form>
-              
-              <div className="mt-4 text-center text-xs text-muted-foreground bg-muted p-2 rounded">
-                <p>For demo: use the following credentials</p>
-                <div className="mt-1">
-                  <p><strong>Admin:</strong> admin@example.com / password</p>
-                  <p><strong>Doctor:</strong> doctor@example.com / password</p>
-                  <p><strong>Staff:</strong> staff@example.com / password</p>
-                </div>
-              </div>
-            </TabsContent>
-            
-            {/* Patient Login Tab */}
-            <TabsContent value="patient" className="mt-4">
+            {/* Patient Login Content */}
               <div className="space-y-4">
                 {/* Patient Login Options */}
                 <div className="text-center mb-4">
@@ -412,8 +315,7 @@ export default function LoginPage() {
                 
 
               </div>
-            </TabsContent>
-          </Tabs>
+          </div>
         </CardContent>
         {/* <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
