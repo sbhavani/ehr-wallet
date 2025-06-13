@@ -27,10 +27,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
       
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       
       - name: Validate environment variables
         run: |
@@ -43,10 +48,10 @@ jobs:
           [ -z "$NEXTAUTH_SECRET" ] && echo "⚠️ NEXTAUTH_SECRET is not set" || echo "✅ NEXTAUTH_SECRET is set"
       
       - name: Lint
-        run: npm run lint || true
+        run: pnpm run lint || true
       
       - name: Build
-        run: npm run build
+        run: pnpm run build
       
       # Skip actual database tests in CI if needed
       - name: Set up test database mock
@@ -60,4 +65,4 @@ jobs:
           node prisma-mock-setup.js
       
       - name: Test
-        run: npm test || true
+        run: pnpm test || true
