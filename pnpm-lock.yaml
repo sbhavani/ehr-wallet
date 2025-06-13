@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  semver@<5.7.2: ^5.7.2
+  parse-duration@<2.1.3: ^2.1.3
+
 importers:
 
   .:
@@ -7300,8 +7304,8 @@ packages:
   parse-cache-control@1.0.1:
     resolution: {integrity: sha512-60zvsJReQPX5/QP0Kzfd/VrpjScIQ7SHBW6bFCYfEP+fp0Eppr1SHhIO5nd1PjZtvclzSzES9D/p5nFJurwfWg==}
 
-  parse-duration@1.1.2:
-    resolution: {integrity: sha512-p8EIONG8L0u7f8GFgfVlL4n8rnChTt8O5FSxgxMz2tjc9FMP199wxVKVB6IbKx11uTbKHACSvaLVIKNnoeNR/A==}
+  parse-duration@2.1.4:
+    resolution: {integrity: sha512-b98m6MsCh+akxfyoz9w9dt0AlH2dfYLOBss5SdDsr9pkhKNvkWBXU/r8A4ahmIGByBOLV2+4YwfCuFxbDDaGyg==}
 
   parse-json@4.0.0:
     resolution: {integrity: sha512-aOIos8bujGN93/8Ox/jPLh7RwVnPEysynVFE+fQZyg6jKELEHwzgKdLRFHUgXJL6kylijVSBC4BvN9OmsB48Rw==}
@@ -7968,10 +7972,6 @@ packages:
   secp256k1@4.0.4:
     resolution: {integrity: sha512-6JfvwvjUOn8F/jUoBY2Q1v5WY5XS+rj8qSe0v8Y4ezH4InLgTEeOOPQsRll9OV429Pvo6BCHGavIyJfr3TAhsw==}
     engines: {node: '>=18.0.0'}
-
-  semver@2.3.2:
-    resolution: {integrity: sha512-abLdIKCosKfpnmhS52NCTjO4RiLspDfsn37prjzGrp9im5DPJOgh82Os92vtwGh6XdQryKI/7SREZnV+aqiXrA==}
-    hasBin: true
 
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
@@ -16211,7 +16211,7 @@ snapshots:
       merge-options: 3.0.4
       multiformats: 11.0.2
       nanoid: 4.0.2
-      parse-duration: 1.1.2
+      parse-duration: 2.1.4
       timeout-abort-controller: 3.0.0
       uint8arrays: 4.0.10
     transitivePeerDependencies:
@@ -16236,7 +16236,7 @@ snapshots:
       it-last: 2.0.1
       merge-options: 3.0.4
       multiformats: 11.0.2
-      parse-duration: 1.1.2
+      parse-duration: 2.1.4
       stream-to-it: 0.2.4
       uint8arrays: 4.0.10
     transitivePeerDependencies:
@@ -17282,7 +17282,7 @@ snapshots:
       errno: 0.1.8
       prr: 0.0.0
       readable-stream: 1.0.34
-      semver: 2.3.2
+      semver: 5.7.2
       xtend: 3.0.0
 
   leven@3.1.0: {}
@@ -18145,7 +18145,7 @@ snapshots:
 
   parse-cache-control@1.0.1: {}
 
-  parse-duration@1.1.2: {}
+  parse-duration@2.1.4: {}
 
   parse-json@4.0.0:
     dependencies:
@@ -18940,8 +18940,6 @@ snapshots:
       elliptic: 6.6.1
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.4
-
-  semver@2.3.2: {}
 
   semver@5.7.2: {}
 
