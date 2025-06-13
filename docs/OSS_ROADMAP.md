@@ -23,6 +23,11 @@ This document outlines the strategic roadmap for transforming Health Wallet into
 - [x] Document security update policy
 - [x] Establish disclosure timeline expectations
 - [x] Implement security scanning in CI pipeline
+  - Added GitHub CodeQL Analysis for static code analysis (free for open source)
+  - Implemented npm audit for dependency vulnerability scanning
+  - Added ESLint security plugins (eslint-plugin-security, eslint-plugin-no-unsanitized)
+  - Configured Gitleaks for detecting hardcoded secrets
+  - Set up weekly scheduled scans in addition to PR/push triggers
 
 ## Phase 2: Documentation & Contribution Improvements (Q4 2025)
 
