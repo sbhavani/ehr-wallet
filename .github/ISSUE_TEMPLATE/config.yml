@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Health Wallet Community Discussions
+    url: https://github.com/sbhavani/health-wallet/discussions
+    about: Please ask and answer questions here.
+  - name: Health Wallet Security Policy
+    url: https://github.com/sbhavani/health-wallet/security/policy
+    about: Please report security vulnerabilities here.
+  - name: Health Wallet Documentation
+    url: https://github.com/sbhavani/health-wallet/tree/main/docs
+    about: Check our documentation before filing an issue.
