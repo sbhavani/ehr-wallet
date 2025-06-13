@@ -22,7 +22,7 @@ This document outlines the strategic roadmap for transforming Health Wallet into
 - [x] Create SECURITY.md with vulnerability reporting process
 - [x] Document security update policy
 - [x] Establish disclosure timeline expectations
-- [ ] Implement security scanning in CI pipeline
+- [x] Implement security scanning in CI pipeline
 
 ## Phase 2: Documentation & Contribution Improvements (Q4 2025)
 

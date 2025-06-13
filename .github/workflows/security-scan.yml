@@ -1,0 +1,97 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans weekly (Sunday at midnight)
+    - cron: '0 0 * * 0'
+
+jobs:
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for CodeQL analysis
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Run npm audit to check for vulnerable dependencies
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      # Initialize CodeQL
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, typescript
+
+      # Autobuild attempts to build any compiled languages
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      # Run CodeQL Analysis
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+
+      # Install ESLint security plugins
+      - name: Install ESLint security plugins
+        run: |
+          npm install --save-dev eslint-plugin-security eslint-plugin-no-unsanitized
+
+      # Create a temporary ESLint config that includes security plugins
+      - name: Create security-focused ESLint config
+        run: |
+          cat > .eslintrc.security.js << 'EOL'
+          module.exports = {
+            extends: ['./.eslintrc.js'],
+            plugins: ['security', 'no-unsanitized'],
+            rules: {
+              'security/detect-buffer-noassert': 'error',
+              'security/detect-child-process': 'error',
+              'security/detect-disable-mustache-escape': 'error',
+              'security/detect-eval-with-expression': 'error',
+              'security/detect-no-csrf-before-method-override': 'error',
+              'security/detect-non-literal-fs-filename': 'error',
+              'security/detect-non-literal-regexp': 'error',
+              'security/detect-non-literal-require': 'error',
+              'security/detect-object-injection': 'warn',
+              'security/detect-possible-timing-attacks': 'error',
+              'security/detect-pseudoRandomBytes': 'error',
+              'security/detect-unsafe-regex': 'error',
+              'no-unsanitized/method': 'error',
+              'no-unsanitized/property': 'error'
+            }
+          };
+          EOL
+
+      # Run ESLint with security plugins
+      - name: Run ESLint security scan
+        run: npx eslint --config .eslintrc.security.js --ext .js,.jsx,.ts,.tsx . || true
+
+      # Check for hardcoded secrets
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
