@@ -1,7 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+
+// Initialize Prisma client directly in the API route
+// Use type assertion to avoid TypeScript errors with model names
+const prisma = new PrismaClient() as PrismaClient & {
+  sharedMedicalData: any;
+};
+
 
 export default async function handler(
   req: NextApiRequest,

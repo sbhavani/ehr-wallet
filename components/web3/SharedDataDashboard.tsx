@@ -24,6 +24,8 @@ const fetchSharedRecords = async (address?: string, forceRefresh = true) => {
     const response = await fetch(url, {
       // Add cache: 'no-store' to prevent caching
       cache: 'no-store',
+      // Include credentials to send authentication cookies
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },
