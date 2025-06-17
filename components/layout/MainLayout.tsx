@@ -1,5 +1,6 @@
 
 import { useState, ReactNode, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
@@ -14,15 +15,57 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isMobile = useIsMobile();
   const isTablet = useMediaQuery({ query: "(min-width: 768px)" });
+  const router = useRouter();
   
-  // Set sidebar default state based on screen size
+  // Set sidebar default state based on screen size - always open on desktop
   useEffect(() => {
-    setSidebarOpen(!isMobile);
+    // Only close on mobile, keep open on desktop
+    if (isMobile) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
   }, [isMobile]);
+  
+  // Store sidebar state in localStorage to persist across navigation
+  useEffect(() => {
+    // Only store for desktop view
+    if (!isMobile) {
+      localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
+    }
+  }, [sidebarOpen, isMobile]);
+  
+  // Restore sidebar state from localStorage on initial load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isMobile) {
+      const storedState = localStorage.getItem('sidebarOpen');
+      if (storedState !== null) {
+        // Parse stored state, but default to true (open) if not found
+        setSidebarOpen(storedState ? JSON.parse(storedState) : true);
+      } else {
+        // If no stored state, default to open
+        setSidebarOpen(true);
+      }
+    }
+  }, [isMobile]);
+  
+  // Prevent sidebar from collapsing during page transitions
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      // Don't close sidebar on route change
+      // We're intentionally not modifying the state here
+    };
+    
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, [router]);
   
   // On mobile, sidebar is closed by default
   const isOpen = isMobile ? false : sidebarOpen;

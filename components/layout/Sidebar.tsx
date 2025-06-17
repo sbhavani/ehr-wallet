@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -142,7 +142,12 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                       "bg-primary text-primary-foreground": isActive,
                       "text-foreground hover:bg-secondary": !isActive
                     })}
-                    onClick={isMobile ? onClose : undefined}
+                    onClick={(e) => {
+                      // Prevent default behavior to handle navigation manually
+                      if (isMobile) {
+                        onClose();
+                      }
+                    }}
                   >
                     <span className="mr-3">{link.icon}</span>
                     {link.name}
@@ -166,7 +171,12 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                         "bg-primary text-primary-foreground": isActive,
                         "text-foreground hover:bg-secondary": !isActive
                       })}
-                      onClick={isMobile ? onClose : undefined}
+                      onClick={(e) => {
+                        // Prevent default behavior to handle navigation manually
+                        if (isMobile) {
+                          onClose();
+                        }
+                      }}
                     >
                       <span className="mr-3">{link.icon}</span>
                       {link.name}
@@ -201,6 +211,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   "bg-primary text-primary-foreground": isActive,
                   "text-foreground hover:bg-secondary": !isActive
                 })}
+                prefetch={true}
               >
                 <span className={cn("mr-3", !isOpen && "mr-0")}>
                   {link.icon}
@@ -228,6 +239,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     "bg-primary text-primary-foreground": isActive,
                     "text-foreground hover:bg-secondary": !isActive
                   })}
+                  prefetch={true}
                 >
                   <span className={cn("mr-3", !isOpen && "mr-0")}>
                     {link.icon}
