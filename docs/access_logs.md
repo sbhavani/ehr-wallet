@@ -1,6 +1,6 @@
 # Access Logs for Patient Data Sharing
 
-This document explains how access logs work in the Radiant Flow Imaging Hub application, including the implementation details, data flow, and technical architecture.
+This document explains how access logs work in the Health Wallet application, including the implementation details, data flow, and technical architecture.
 
 ## 1. Overview
 
