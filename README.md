@@ -6,6 +6,12 @@
 
 Health Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
 
+## Project Roadmap
+
+Track our development progress and upcoming features on our public GitHub Project board:
+
+[View Health Wallet Roadmap](https://github.com/users/sbhavani/projects/2/views/1)
+
 ## Product Screenshot
 
 ![Health Wallet Dashboard](/public/healthwallet-dashboard.png)
