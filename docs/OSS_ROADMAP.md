@@ -32,16 +32,16 @@ This document outlines the strategic roadmap for transforming Health Wallet into
 ## Phase 2: Documentation & Contribution Improvements (Q4 2025)
 
 ### Enhanced Documentation
-- [ ] Create architecture documentation
+- [x] Create architecture documentation
 - [ ] Develop comprehensive API documentation
-- [ ] Write user guides for patients and healthcare providers
+- [ ] Write user guide for patients
 - [ ] Create developer onboarding guide
 - [ ] Document deployment procedures
 
 ### Contribution Process
 - [ ] Implement Developer Certificate of Origin (DCO) sign-offs
 - [ ] Add DCO GitHub Action for verification
-- [ ] Create GitHub issue templates
+- [x] Create GitHub issue templates
 - [ ] Enhance PR templates with checklists
 
 ### Code Quality
@@ -53,8 +53,8 @@ This document outlines the strategic roadmap for transforming Health Wallet into
 ## Phase 3: Community Growth & Sustainability (Q1 2026)
 
 ### Project Roadmap
-- [ ] Create detailed ROADMAP.md with short/medium/long-term goals
-- [ ] Establish feature prioritization process
+- [x] Create detailed roadmap with short/medium/long-term goals
+- [x] Establish feature prioritization process
 - [ ] Define release planning methodology
 - [ ] Document long-term vision aligned with healthcare industry needs
 
