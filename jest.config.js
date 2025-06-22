@@ -24,6 +24,12 @@ const customJestConfig = {
     '**/pages/api/**/*.test.[jt]s?(x)',
     '**/test/**/*.test.[jt]s?(x)',
   ],
+  // Exclude Playwright tests from Jest runs
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/.next/',
+    '<rootDir>/test/playwright/',
+  ],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
