@@ -156,10 +156,6 @@ export default function LoginPage() {
             
             {/* Patient Login Content */}
               <div className="space-y-4">
-                {/* Patient Login Options */}
-                <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground mb-2">Sign in to access your medical records</p>
-                </div>
 
                 {/* Web3 Wallet Login - First */}
                 <div className="mb-6">
