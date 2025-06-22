@@ -29,6 +29,7 @@ const customJestConfig = {
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/test/playwright/',
+    '<rootDir>/test/AccessControl.test.js', // Exclude Hardhat tests from Jest
   ],
 };
 

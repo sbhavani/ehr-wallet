@@ -1,6 +1,27 @@
 // test-setup.js
 // This script runs before Jest tests to set up mocks and environment variables
 
+// Add polyfills for crypto-related functionality needed by Hardhat/ethers
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Set up crypto polyfills for Node.js environment
+if (!global.crypto) {
+  const nodeCrypto = require('crypto');
+  
+  global.crypto = {
+    getRandomValues: function(buffer) {
+      return nodeCrypto.randomFillSync(buffer);
+    },
+    subtle: {}
+  };
+}
+
+// Mock browser environment for ethers.js
+global.window = { crypto: global.crypto };
+global.Buffer = global.Buffer || require('buffer').Buffer;
+
 // Mock Prisma client to avoid actual database connections in CI
 jest.mock('@prisma/client', () => {
   const mockPrismaClient = {
