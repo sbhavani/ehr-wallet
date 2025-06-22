@@ -1,5 +1,6 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
+const path = require('path');
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -37,10 +38,28 @@ module.exports = defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'setup',
+      testMatch: /global-setup\.js/,
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'authenticated',
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Use the authenticated state for this project
+        storageState: './test/playwright/auth.json',
+      },
+      dependencies: ['setup'],
     },
   ],
+  
+  // Global setup to run before all tests
+  globalSetup: './test/playwright/global-setup.js',
+  
 
   /* Run your local dev server before starting the tests */
   webServer: {

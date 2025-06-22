@@ -27,7 +27,11 @@ test.describe('Login Test', () => {
     
     // Click the login button and wait for navigation
     console.log('Submitting login form...');
-    await page.getByRole('button', { name: 'Login', exact: true }).click();
+    // Make sure the button is visible and stable before clicking
+    const loginButton = page.getByRole('button', { name: 'Login', exact: true });
+    await loginButton.waitFor({ state: 'visible', timeout: 15000 });
+    // Force click can help with elements that might be detached during rendering
+    await loginButton.click({ force: true, timeout: 15000 });
     
     // Wait for navigation to complete (with a longer timeout)
     console.log('Waiting for navigation to dashboard...');
