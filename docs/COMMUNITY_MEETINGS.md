@@ -1,6 +1,6 @@
 # Community Meetings
 
-This document outlines the structure and schedule for Health Wallet community meetings, providing a regular forum for contributors, users, and stakeholders to collaborate.
+This document outlines the structure and schedule for EHR Wallet community meetings, providing a regular forum for contributors, users, and stakeholders to collaborate.
 
 ## Meeting Schedule
 

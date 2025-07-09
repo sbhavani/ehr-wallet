@@ -1,6 +1,6 @@
 # Project Maintainers
 
-This document lists the maintainers of the Health Wallet project. Maintainers have write access to the repository and are responsible for reviewing and merging pull requests, triaging issues, and ensuring the project's overall health and direction.
+This document lists the maintainers of the EHR Wallet project. Maintainers have write access to the repository and are responsible for reviewing and merging pull requests, triaging issues, and ensuring the project's overall health and direction.
 
 ## Maintainer Responsibilities
 
@@ -23,7 +23,7 @@ Maintainers are expected to:
 
 ## Becoming a Maintainer
 
-The Health Wallet project follows a meritocratic governance model. Contributors who consistently demonstrate commitment, expertise, and good judgment may be invited to become maintainers.
+The EHR Wallet project follows a meritocratic governance model. Contributors who consistently demonstrate commitment, expertise, and good judgment may be invited to become maintainers.
 
 The process for becoming a maintainer:
 

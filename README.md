@@ -1,20 +1,20 @@
-# Health Wallet
+# EHR Wallet
 
 [![CI Status](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml) [![Smart Contract Tests](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml) [![Dependency Review](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml)
 
 ## Project Overview
 
-Health Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
+EHR Wallet is an innovative blockchain-powered healthcare information solution designed to empower patients with full control over their medical data while streamlining healthcare provider workflows. The platform enables secure sharing of medical records, imaging data, and patient information using decentralized web3 technologies.
 
 ## Project Roadmap
 
 Track our development progress and upcoming features on our public GitHub Project board:
 
-[View Health Wallet Roadmap](https://github.com/users/sbhavani/projects/2/views/1)
+[View EHR Wallet Roadmap](https://github.com/users/sbhavani/projects/2/views/1)
 
 ## Product Screenshot
 
-![Health Wallet Dashboard](/public/healthwallet-dashboard.png)
+![EHR Wallet Dashboard](/public/healthwallet-dashboard.png)
 
 ## Key Patient-Centric Features
 
@@ -41,10 +41,10 @@ http://localhost:3000
 
 ## Web3 Patient Features
 
-### Setting Up Your Health Wallet
+### Setting Up Your EHR Wallet
 
 1. **Connect Your Wallet**: Use MetaMask or another Ethereum wallet to connect to the platform
-2. **Grant Initial Access**: Approve the connection to establish your Health Wallet identity
+2. **Grant Initial Access**: Approve the connection to establish your EHR Wallet identity
 3. **Verify Your Identity**: Complete the secure verification process to ensure data sovereignty
 
 ### Managing Your Health Data

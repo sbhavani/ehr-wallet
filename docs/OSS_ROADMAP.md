@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the strategic roadmap for transforming Health Wallet into a fully compliant Linux Foundation-style open source project. The roadmap is organized into phases with specific deliverables and timelines to guide our open source journey.
+This document outlines the strategic roadmap for transforming EHR Wallet into a fully compliant Linux Foundation-style open source project. The roadmap is organized into phases with specific deliverables and timelines to guide our open source journey.
 
 ## Phase 1: Foundation Building (Q3 2025)
 
@@ -110,4 +110,4 @@ We will track the following metrics to measure our open source success:
 
 ## Next Steps
 
-The immediate focus is on implementing the Community Engagement items from Phase 1, which will establish the foundation for a vibrant open source community around the Health Wallet project.
+The immediate focus is on implementing the Community Engagement items from Phase 1, which will establish the foundation for a vibrant open source community around the EHR Wallet project.

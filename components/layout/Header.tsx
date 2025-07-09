@@ -73,7 +73,7 @@ export const Header = ({
               )}
               <span className="sr-only">Toggle menu</span>
             </Button>
-            <div className="text-xl font-semibold text-primary">{isPatient ? "Health Wallet" : "GlobalRad"}</div>
+            <div className="text-xl font-semibold text-primary">{isPatient ? "EHR Wallet" : "GlobalRad"}</div>
           </>
         ) : (
           <>
@@ -81,7 +81,7 @@ export const Header = ({
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle sidebar</span>
             </Button>
-            <div className="text-xl font-semibold text-primary">{isPatient ? "Health Wallet" : "GlobalRad"}</div>
+            <div className="text-xl font-semibold text-primary">{isPatient ? "EHR Wallet" : "GlobalRad"}</div>
           </>
         )}
       </div>

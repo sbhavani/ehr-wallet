@@ -1,6 +1,6 @@
 # API Documentation
 
-Welcome to the API documentation for Health Wallet.
+Welcome to the API documentation for EHR Wallet.
 
 This documentation provides details on the available API endpoints, request parameters, and response formats.
 

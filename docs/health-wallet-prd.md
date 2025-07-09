@@ -1,8 +1,8 @@
-# Health Wallet PRD
+# EHR Wallet PRD
 
 ## 1. Introduction
 
-Health Wallet is a decentralized application that empowers patients to securely own, manage, and share their health data. By leveraging blockchain technology, we provide a transparent and tamper-proof platform for patients to control who can access their sensitive medical information.
+EHR Wallet is a decentralized application that empowers patients to securely own, manage, and share their health data. By leveraging blockchain technology, we provide a transparent and tamper-proof platform for patients to control who can access their sensitive medical information.
 
 ## 2. Current Features
 
@@ -17,7 +17,7 @@ Based on the current codebase, the application includes the following features:
 
 ## 3. Proposed Features & Roadmap
 
-To enhance the Health Wallet, we propose the following features, prioritized for development:
+To enhance the EHR Wallet, we propose the following features, prioritized for development:
 
 ### Priority 1: Enhance Core Functionality
 

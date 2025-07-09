@@ -119,7 +119,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <div className="p-4 border-b border-border">
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-semibold text-primary">
-                {userRole === "PATIENT" ? "Health Wallet" : "GlobalRad"}
+                {userRole === "PATIENT" ? "EHR Wallet" : "GlobalRad"}
               </h1>
               {/* Close button removed to avoid duplicate X icons */}
             </div>

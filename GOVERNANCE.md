@@ -1,10 +1,10 @@
 # Project Governance
 
-This document outlines the governance structure for the Radiant Flow Imaging Hub (Health Wallet) project. It defines how decisions are made, how contributors can become maintainers, and how the project is managed.
+This document outlines the governance structure for the Radiant Flow Imaging Hub (EHR Wallet) project. It defines how decisions are made, how contributors can become maintainers, and how the project is managed.
 
 ## Project Structure
 
-The Health Wallet project follows a meritocratic, consensus-based governance model. The project is led by a group of maintainers who have demonstrated both technical expertise and community leadership.
+The EHR Wallet project follows a meritocratic, consensus-based governance model. The project is led by a group of maintainers who have demonstrated both technical expertise and community leadership.
 
 ### Roles and Responsibilities
 
@@ -30,7 +30,7 @@ The Health Wallet project follows a meritocratic, consensus-based governance mod
 
 ## Decision Making Process
 
-The Health Wallet project aims to operate by consensus, particularly for technical decisions. The process works as follows:
+The EHR Wallet project aims to operate by consensus, particularly for technical decisions. The process works as follows:
 
 ### Day-to-Day Decisions
 - Routine decisions are made through pull request reviews and discussions
@@ -96,7 +96,7 @@ Contributors who consistently demonstrate commitment, expertise, and good judgme
 
 ## Code of Conduct
 
-All participants in the Health Wallet community are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). The TSC is responsible for enforcing the Code of Conduct and addressing violations.
+All participants in the EHR Wallet community are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). The TSC is responsible for enforcing the Code of Conduct and addressing violations.
 
 ## Changes to Governance
 
@@ -107,7 +107,7 @@ Changes to this governance document require:
 
 ## License
 
-The Health Wallet project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+The EHR Wallet project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Attribution
 

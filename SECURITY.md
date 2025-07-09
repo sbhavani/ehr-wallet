@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-The Health Wallet team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings and will make every effort to acknowledge your contributions.
+The EHR Wallet team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings and will make every effort to acknowledge your contributions.
 
 ### How to Report a Security Vulnerability
 
@@ -55,7 +55,7 @@ Please include the following information in your report:
 
 ## Security Features
 
-Health Wallet implements several security features to protect sensitive healthcare data:
+EHR Wallet implements several security features to protect sensitive healthcare data:
 
 - End-to-end encryption for medical records
 - Blockchain-based access control and audit trails
@@ -90,7 +90,7 @@ For sensitive communications, please use our PGP key:
 
 ## Security Acknowledgments
 
-We would like to thank the following individuals who have helped improve the security of Health Wallet through responsible disclosures:
+We would like to thank the following individuals who have helped improve the security of EHR Wallet through responsible disclosures:
 
 - List will be updated as contributions are received
 
@@ -104,4 +104,4 @@ Security updates will be announced through:
 
 ## Security-Related Questions
 
-For general questions about Health Wallet security, please open a discussion on GitHub or contact us at [security@example.com](mailto:security@example.com).
+For general questions about EHR Wallet security, please open a discussion on GitHub or contact us at [security@example.com](mailto:security@example.com).
