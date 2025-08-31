@@ -22,12 +22,15 @@ This document outlines the strategic roadmap for transforming EHR Wallet into a 
 - [x] Create SECURITY.md with vulnerability reporting process
 - [x] Document security update policy
 - [x] Establish disclosure timeline expectations
-- [x] Implement security scanning in CI pipeline
-  - Added GitHub CodeQL Analysis for static code analysis (free for open source)
-  - Implemented npm audit for dependency vulnerability scanning
-  - Added ESLint security plugins (eslint-plugin-security, eslint-plugin-no-unsanitized)
-  - Configured TruffleHog for detecting hardcoded secrets (open source alternative)
-  - Set up weekly scheduled scans in addition to PR/push triggers
+- [x] Implement comprehensive security scanning in CI pipeline
+  - [x] Added GitHub CodeQL Analysis for static code analysis (free for open source)
+  - [x] Implemented pnpm audit for dependency vulnerability scanning
+  - [x] Added ESLint security plugins (eslint-plugin-security, eslint-plugin-no-unsanitized) in CI workflow
+  - [x] Configured TruffleHog for detecting hardcoded secrets (open source alternative)
+  - [x] Set up weekly scheduled scans (Sunday at midnight) in addition to PR/push triggers
+  - [x] Added dependency review workflow for PR-based dependency analysis
+- [ ] Integrate ESLint security plugins into main development workflow (currently only used in CI)
+- [ ] Add security scanning results reporting and notifications
 
 ## Phase 2: Documentation & Contribution Improvements (Q4 2025)
 
