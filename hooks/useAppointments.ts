@@ -161,9 +161,8 @@ export const useAppointmentBooking = () => {
       // Create the appointment
       const newAppointment = await createAppointment({
         ...appointmentData,
-        status: 'scheduled',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        title: appointmentData.reason || 'Appointment',
+        status: 'SCHEDULED'
       });
 
       // Find and mark the corresponding time slot as unavailable
@@ -210,7 +209,7 @@ export const useAppointmentActions = () => {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateAppointmentStatus = useCallback(async (appointmentId: string, status: string) => {
+  const updateAppointmentStatus = useCallback(async (appointmentId: string, status: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW') => {
     try {
       setUpdating(true);
       setError(null);
@@ -246,7 +245,7 @@ export const useAppointmentActions = () => {
 
       // Update appointment status
       await updateAppointment(appointmentId, { 
-        status: 'cancelled',
+        status: 'CANCELLED',
         updatedAt: new Date()
       });
 

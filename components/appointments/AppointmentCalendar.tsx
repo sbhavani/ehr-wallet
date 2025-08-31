@@ -14,7 +14,7 @@ import { AppointmentWithDetails } from '@/hooks/useAppointments';
 import AppointmentDetails from './AppointmentDetails';
 
 interface AppointmentCalendarProps {
-  patientId: string;
+  patientId?: string;
   onAppointmentSelect?: (appointmentId: string) => void;
 }
 
@@ -269,9 +269,9 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                             </p>
                           )}
                           
-                          {appointment.reason && (
+                          {appointment.notes && (
                             <p className="text-sm text-muted-foreground mt-1">
-                              {appointment.reason}
+                              {appointment.notes}
                             </p>
                           )}
                         </div>

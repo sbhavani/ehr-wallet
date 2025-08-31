@@ -141,7 +141,10 @@ export default function SchedulingPage() {
                     ✕
                   </Button>
                 </div>
-                <AppointmentBooking onClose={() => setShowBooking(false)} />
+                <AppointmentBooking 
+                  patientId="default-patient" 
+                  onCancel={() => setShowBooking(false)} 
+                />
               </div>
             </div>
           </div>
