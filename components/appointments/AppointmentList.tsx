@@ -18,7 +18,10 @@ interface AppointmentWithDetails extends AppointmentType {
 
 interface AppointmentListProps {
   patientId?: string;
+  appointments?: AppointmentWithDetails[];
+  loading?: boolean;
   onAppointmentSelect?: (appointment: AppointmentWithDetails) => void;
+  onRefresh?: () => void;
   showActions?: boolean;
 }
 
@@ -174,7 +177,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
               className={`transition-all duration-200 hover:shadow-md ${
                 onAppointmentSelect ? 'cursor-pointer hover:bg-gray-50' : ''
               }`}
-              onClick={() => onAppointmentSelect?.(appointment.id)}
+              onClick={() => onAppointmentSelect?.(appointment)}
             >
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -237,12 +240,12 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onAppointmentSelect?.(appointment.id);
+                          onAppointmentSelect?.(appointment);
                         }}
                       >
                         View Details
                       </Button>
-                      {appointment.status === 'scheduled' && (
+                      {appointment.status === 'SCHEDULED' && (
                         <Button 
                           variant="outline" 
                           size="sm"

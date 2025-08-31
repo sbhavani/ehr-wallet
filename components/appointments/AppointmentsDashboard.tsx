@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AppointmentList from './AppointmentList';
 import AppointmentBooking from './AppointmentBooking';
 import AppointmentDetails from './AppointmentDetails';
-import { useAppointments, useAppointmentData } from '@/hooks/useAppointments';
+import { useAppointments, useAppointmentData, AppointmentFilters } from '@/hooks/useAppointments';
 import { format, isToday, isTomorrow, isThisWeek, isThisMonth } from 'date-fns';
 
 interface AppointmentsDashboardProps {
@@ -36,17 +36,17 @@ const AppointmentsDashboard: React.FC<AppointmentsDashboardProps> = ({ patientId
 
   // Filter appointments by status for quick stats
   const upcomingAppointments = appointments.filter(apt => 
-    apt.status === 'scheduled' || apt.status === 'confirmed'
+    apt.status === 'SCHEDULED' || apt.status === 'CONFIRMED'
   );
   const todayAppointments = appointments.filter(apt => 
-    isToday(new Date(apt.startTime)) && (apt.status === 'scheduled' || apt.status === 'confirmed')
+    isToday(new Date(apt.startTime)) && (apt.status === 'SCHEDULED' || apt.status === 'CONFIRMED')
   );
   const pastAppointments = appointments.filter(apt => 
-    apt.status === 'completed' || apt.status === 'cancelled' || apt.status === 'no_show'
+    apt.status === 'COMPLETED' || apt.status === 'CANCELLED' || apt.status === 'NO_SHOW'
   );
 
-  const handleAppointmentSelect = (appointmentId: string) => {
-    setSelectedAppointmentId(appointmentId);
+  const handleAppointmentSelect = (appointment: any) => {
+    setSelectedAppointmentId(appointment.id);
     setShowDetailsDialog(true);
   };
 
@@ -156,7 +156,7 @@ const AppointmentsDashboard: React.FC<AppointmentsDashboardProps> = ({ patientId
             </DialogHeader>
             <AppointmentBooking
               patientId={patientId}
-              onSuccess={handleBookingSuccess}
+              onBookingComplete={handleBookingSuccess}
               onCancel={() => setShowBookingDialog(false)}
             />
           </DialogContent>

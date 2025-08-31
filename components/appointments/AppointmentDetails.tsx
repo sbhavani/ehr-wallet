@@ -130,7 +130,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW') => {
     if (!appointment) return;
 
     try {
@@ -155,7 +155,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
       setUpdating(true);
       
       // Update appointment status to cancelled
-      await updateAppointment(appointment.id, { status: 'cancelled' });
+      await updateAppointment(appointment.id, { status: 'CANCELLED' });
       
       // Find and free up the time slot
       const timeSlots = await getAllTimeSlots();
@@ -176,7 +176,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
         await updateTimeSlot(matchingSlot.id, { isAvailable: true });
       }
 
-      setAppointment(prev => prev ? { ...prev, status: 'cancelled' } : null);
+      setAppointment(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
       toast.success('Appointment cancelled successfully');
       setShowCancelDialog(false);
       onUpdate?.();
@@ -225,9 +225,9 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
     );
   }
 
-  const canCancel = appointment.status === 'scheduled' || appointment.status === 'confirmed';
-  const canConfirm = appointment.status === 'scheduled';
-  const canComplete = appointment.status === 'confirmed';
+  const canCancel = appointment.status === 'SCHEDULED' || appointment.status === 'CONFIRMED';
+  const canConfirm = appointment.status === 'SCHEDULED';
+  const canComplete = appointment.status === 'CONFIRMED';
 
   return (
     <Card>
@@ -245,7 +245,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
               {appointment.appointmentType?.name || 'Appointment'}
             </h2>
             <p className="text-gray-600">
-              {appointment.reason && `Reason: ${appointment.reason}`}
+              {appointment.notes && `Reason: ${appointment.notes}`}
             </p>
           </div>
           <Badge className={getStatusColor(appointment.status)}>
@@ -317,12 +317,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
                 )}
               </div>
               
-              {appointment.provider.address && (
-                <div className="flex items-start gap-2 text-sm mt-2">
-                  <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                  <span>{appointment.provider.address}</span>
-                </div>
-              )}
+
             </div>
           </div>
         )}
@@ -369,7 +364,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Cost: </span>
-                  <span>${appointment.appointmentType.price}</span>
+                  <span>Contact for pricing</span>
                 </div>
               </div>
               
@@ -401,7 +396,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
         <div className="flex flex-col sm:flex-row gap-3">
           {canConfirm && (
             <Button
-              onClick={() => handleStatusUpdate('confirmed')}
+              onClick={() => handleStatusUpdate('CONFIRMED')}
               disabled={updating}
               className="flex-1"
             >
@@ -412,7 +407,7 @@ const AppointmentDetails: React.FC<AppointmentDetailsProps> = ({
           
           {canComplete && (
             <Button
-              onClick={() => handleStatusUpdate('completed')}
+              onClick={() => handleStatusUpdate('COMPLETED')}
               disabled={updating}
               variant="outline"
               className="flex-1"

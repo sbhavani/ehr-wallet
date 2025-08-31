@@ -154,9 +154,9 @@ const AppointmentBooking: React.FC<AppointmentBookingProps> = ({
         appointmentTypeId: selectedAppointmentType,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
-        status: 'scheduled' as const,
-        notes: notes.trim() || undefined,
-        reason: reason.trim() || undefined
+        title: reason.trim() || 'Appointment',
+        status: 'SCHEDULED' as const,
+        notes: notes.trim() || undefined
       };
 
       const newAppointment = await createAppointment(appointmentData);
@@ -250,7 +250,7 @@ const AppointmentBooking: React.FC<AppointmentBookingProps> = ({
                     <div className="flex flex-col">
                       <span className="font-medium">{type.name}</span>
                       <span className="text-sm text-gray-500">
-                        {type.duration} minutes - ${type.price}
+                        {type.duration} minutes
                       </span>
                     </div>
                   </SelectItem>
