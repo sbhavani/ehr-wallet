@@ -2,7 +2,7 @@
 
 # EHR Wallet
 
-[![CI Status](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml) [![Smart Contract Tests](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml) [![Dependency Review](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/dependency-review.yml)
+[![CI Status](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/ci.yml) [![Smart Contract Tests](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/sbhavani/health-wallet/actions/workflows/smart-contract.yml)
 
 ## Project Overview
 
