@@ -98,15 +98,23 @@ jobs:
         run: npx eslint --config .eslintrc.security.js --ext .js,.jsx,.ts,.tsx . || true
 
       # Check for hardcoded secrets using TruffleHog (open source alternative)
-      # For push/PR events: compare base and head commits
-      # For scheduled runs: scan commits from the past week
-      - name: Check for hardcoded secrets (Push/PR)
-        if: github.event_name != 'schedule'
+      # For pull_request: compare PR base and head
+      # For push: auto-detect commits from push event
+      # For schedule: scan recent commits
+      - name: Check for hardcoded secrets (Pull Request)
+        if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.pull_request.base.sha || 'main' }}
-          head: HEAD
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --debug --only-verified
+
+      - name: Check for hardcoded secrets (Push)
+        if: github.event_name == 'push'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
           extra_args: --debug --only-verified
 
       - name: Check for hardcoded secrets (Scheduled)
