@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  swcMinify: false,
-  experimental: {
-    esmExternals: false,
-  },
+  // Turbopack is the default bundler in Next.js 16
+  // Empty config silences webpack migration warning
+  turbopack: {},
+  // Externalize IPFS/Helia modules to avoid native module loading issues
+  serverExternalPackages: [
+    'helia',
+    '@helia/unixfs',
+    '@helia/json',
+    '@ipshipyard/node-datachannel',
+    'ipfs-http-client',
+  ],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

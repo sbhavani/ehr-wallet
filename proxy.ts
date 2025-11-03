@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Simplified middleware during the Vite to Next.js migration.
+ * Simplified proxy during the Vite to Next.js migration.
  * We're using client-side SessionWrapper for most auth logic during the migration.
- * 
- * This middleware only protects API routes and lets the SessionWrapper handle page routing.
+ *
+ * This proxy only protects API routes and lets the SessionWrapper handle page routing.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Skip all frontend routes and static assets
@@ -31,6 +31,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Skip middleware for static files
+  // Skip proxy for static files
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

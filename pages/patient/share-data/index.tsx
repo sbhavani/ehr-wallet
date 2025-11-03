@@ -3,12 +3,14 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import dynamic from 'next/dynamic';
 import PatientLayout from '@/components/layout/PatientLayout';
 
 // Temporarily use regular imports to debug dynamic import issue
 import DataSharingForm from '@/components/web3/DataSharingForm';
 import ShareDisplay from '@/components/web3/ShareDisplay';
+
+// Force dynamic rendering to avoid build-time IPFS module loading
+export const dynamic = 'force-dynamic';
 
 export default function ShareDataPage() {
   const { data: session } = useSession();

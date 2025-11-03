@@ -11,6 +11,9 @@ import { Loader2, FileText, Download, Lock, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+// Force dynamic rendering to avoid build-time IPFS module loading
+export const dynamic = 'force-dynamic';
+
 export default function IpfsViewerPage() {
   const router = useRouter();
   const { cid } = router.query;
