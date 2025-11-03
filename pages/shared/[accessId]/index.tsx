@@ -329,3 +329,10 @@ export default function SharedDataPage() {
     </div>
   );
 }
+
+// Disable static generation for this page since it requires client-side Web3 context
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

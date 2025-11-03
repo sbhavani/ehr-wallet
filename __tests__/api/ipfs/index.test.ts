@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import handler from './index';
+import handler from '../../../pages/api/ipfs/index';
 
 // Mock Response class since it's not available in Node.js environment
 class MockResponse {

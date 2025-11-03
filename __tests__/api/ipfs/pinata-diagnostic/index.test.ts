@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import handler from './index';
+import handler from '../../../../pages/api/ipfs/pinata-diagnostic/index';
 
 // Mock fetch
 global.fetch = jest.fn();
