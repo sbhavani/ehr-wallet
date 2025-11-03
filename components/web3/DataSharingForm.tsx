@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, FileText, FlaskConical, Image, Pill, ClipboardList, Clock, Shield, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Loader2, FileText, FlaskConical, Image, Pill, ClipboardList, Clock, Shield, AlertCircle, CheckCircle2, Info, Upload } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { encryptData, uploadToIpfs, checkIpfsAvailability } from '@/lib/web3/ipfs';
 import { pinataService } from '@/lib/web3/pinata';
 import { createAccessGrant, generateShareableLink } from '@/lib/web3/contract';
@@ -94,6 +95,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadStage, setUploadStage] = useState<string>('');
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormValues>({
@@ -130,6 +133,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
     setIsSubmitting(true);
     setError(null);
     setLogs([]);
+    setUploadProgress(0);
+    setUploadStage('Initializing...');
     addLog('Starting data sharing process...');
     
     // Validate form data
@@ -153,8 +158,10 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
 
     try {
       // Check if MetaMask is installed
+      setUploadProgress(10);
+      setUploadStage('Checking wallet connection...');
       addLog('Checking if MetaMask is installed...');
-      
+
       // Add a flag to bypass MetaMask requirement for testing
       const bypassMetaMask = true; // Set to true to bypass MetaMask requirement
       
@@ -190,6 +197,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
 
       if (values.uploadMode === 'documents') {
         // Handle document uploads
+        setUploadProgress(20);
+        setUploadStage('Processing documents...');
         addLog('Processing document uploads...');
         if (uploadedFiles.length === 0) {
           addLog('ERROR: No documents uploaded');
@@ -236,11 +245,14 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
       }
 
       // Encrypt data if password is used
+      setUploadProgress(40);
       if (values.usePassword && values.password) {
+        setUploadStage('Encrypting data...');
         addLog('Encrypting data with password...');
         ipfsData = await encryptData(dataToShare, values.password);
         addLog('Data encrypted successfully');
       } else {
+        setUploadStage('Preparing data...');
         addLog('Preparing data for IPFS (unencrypted)...');
         ipfsData = JSON.stringify(dataToShare);
         addLog('Data prepared successfully');
@@ -269,6 +281,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
       }
       
       // Upload to IPFS with Pinata prioritized
+      setUploadProgress(60);
+      setUploadStage('Uploading to IPFS...');
       addLog('Uploading to IPFS...');
       addLog('Data to upload: ' + (typeof ipfsData === 'string' ? ipfsData.substring(0, 50) + '...' : JSON.stringify(dataToShare).substring(0, 50) + '...'));
       try {
@@ -296,15 +310,19 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
 
         if (useDirectIpfs) {
           // Direct IPFS approach (no contract)
+          setUploadProgress(90);
+          setUploadStage('Generating shareable link...');
           addLog('Using direct IPFS sharing (no blockchain contract)');
-          
+
           // Generate a simple shareable link with the CID
           const baseUrl = window.location.origin;
           const shareableLink = `${baseUrl}/ipfs/${ipfsCid}`;
           const accessId = ipfsCid; // Use CID as the access ID
-          
+
           addLog(`Direct IPFS link generated: ${shareableLink}`);
           addLog('Process completed successfully!');
+          setUploadProgress(100);
+          setUploadStage('Complete!');
 
           // Show success toast
           toast.success('Data shared successfully!', {
@@ -315,6 +333,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
           onSuccess(shareableLink, accessId);
         } else {
           // Create access grant on blockchain
+          setUploadProgress(75);
+          setUploadStage('Creating blockchain access grant...');
           const durationInSeconds = parseInt(values.duration);
           addLog(`Creating access grant on blockchain (duration: ${durationInSeconds} seconds)...`);
           const accessId = await createAccessGrant(
@@ -329,6 +349,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
           addLog(`Generated shareable link: ${shareableLink}`);
           
           // Save the shared data to the database via API
+          setUploadProgress(85);
+          setUploadStage('Saving to database...');
           try {
             addLog('Saving shared data to database...');
             
@@ -386,6 +408,8 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
           }
 
           // Show success toast
+          setUploadProgress(100);
+          setUploadStage('Complete!');
           toast.success('Data shared successfully!', {
             description: 'Your medical data has been securely uploaded and a shareable link has been generated.',
           });
@@ -461,22 +485,34 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-bold">Share Your Medical Data</CardTitle>
-        <CardDescription className="text-base">
-          Securely share your medical data or documents with healthcare providers using encryption and blockchain technology
-        </CardDescription>
+    <Card className="w-full shadow-lg border-2">
+      <CardHeader className="pb-6 space-y-4 bg-gradient-to-r from-primary/5 to-primary/10">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Shield className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-bold">Share Your Medical Data</CardTitle>
+            <CardDescription className="text-base">
+              Securely share your medical data or documents with healthcare providers using encryption and blockchain technology
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
               name="uploadMode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What would you like to share?</FormLabel>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                      1
+                    </div>
+                    <FormLabel className="text-lg font-semibold">What would you like to share?</FormLabel>
+                  </div>
                   <Tabs
                     value={field.value}
                     onValueChange={field.onChange}
@@ -498,7 +534,12 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 name="dataTypes"
                 render={() => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold">Select Data Types to Share</FormLabel>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                        2
+                      </div>
+                      <FormLabel className="text-lg font-semibold">Select Data Types to Share</FormLabel>
+                    </div>
                     <FormDescription className="mb-4">
                       Choose which types of medical data you want to share with your healthcare provider
                     </FormDescription>
@@ -574,10 +615,15 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                 name="documents"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold flex items-center">
-                      <FileText className="h-4 w-4 mr-2 text-primary" />
-                      Upload Medical Documents
-                    </FormLabel>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                        2
+                      </div>
+                      <FormLabel className="text-lg font-semibold flex items-center">
+                        <FileText className="h-4 w-4 mr-2 text-primary" />
+                        Upload Medical Documents
+                      </FormLabel>
+                    </div>
                     <FormDescription className="mb-2">
                       Upload medical documents, reports, or images to share securely
                     </FormDescription>
@@ -617,10 +663,15 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               name="duration"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base font-semibold flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-primary" />
-                    Access Duration
-                  </FormLabel>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                      3
+                    </div>
+                    <FormLabel className="text-lg font-semibold flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-primary" />
+                      Access Duration
+                    </FormLabel>
+                  </div>
                   <FormDescription className="mb-2">
                     Set how long the recipient will have access to your data
                   </FormDescription>
@@ -650,22 +701,30 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
               control={form.control}
               name="usePassword"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-lg bg-muted/30">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className="mt-1"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="font-medium flex items-center">
-                      <Shield className="h-4 w-4 mr-2 text-primary" />
-                      Require password for access
-                    </FormLabel>
-                    <FormDescription>
-                      Add an extra layer of security with a password. You'll need to share this password separately with the recipient.
-                    </FormDescription>
+                <FormItem>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                      4
+                    </div>
+                    <FormLabel className="text-lg font-semibold">Security Options</FormLabel>
+                  </div>
+                  <div className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-lg bg-muted/30">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="mt-1"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium flex items-center">
+                        <Shield className="h-4 w-4 mr-2 text-primary" />
+                        Require password for access
+                      </FormLabel>
+                      <FormDescription>
+                        Add an extra layer of security with a password. You'll need to share this password separately with the recipient.
+                      </FormDescription>
+                    </div>
                   </div>
                 </FormItem>
               )}
@@ -727,29 +786,31 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
             />
 
             {error && (
-              <div className="p-4 rounded-lg bg-destructive/10 text-destructive flex items-start space-x-3 mt-4">
-                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Error sharing data</p>
-                  <p className="text-sm">{error}</p>
+              <div className="p-5 rounded-lg bg-destructive/10 border-2 border-destructive/20 text-destructive flex items-start space-x-3 mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <AlertCircle className="h-6 w-6 shrink-0 mt-0.5 flex-none" />
+                <div className="flex-1">
+                  <p className="font-semibold text-base mb-1">Error sharing data</p>
+                  <p className="text-sm opacity-90">{error}</p>
                 </div>
               </div>
             )}
 
-            <div className="flex gap-4 mt-6">
-              <Button 
-                type="button" 
-                variant="outline" 
+            <div className="flex gap-4 mt-8 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
                 onClick={resetForm}
-                disabled={isSubmitting} 
-                className="flex-none"
+                disabled={isSubmitting}
+                className="flex-none px-6"
+                size="lg"
               >
                 Reset Form
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="flex-1 py-6 text-base font-medium"
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+                size="lg"
               >
                 {isSubmitting ? (
                   <>
@@ -758,6 +819,7 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
                   </>
                 ) : (
                   <>
+                    <Shield className="mr-2 h-5 w-5" />
                     Share {uploadMode === 'documents' ? 'Documents' : 'Medical Data'} Securely
                   </>
                 )}
@@ -765,11 +827,15 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
             </div>
             
             {isSubmitting && (
-              <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-sm font-medium mb-2 flex items-center">
-                  <Info className="h-4 w-4 mr-2 text-primary" />
-                  Processing Your Request
-                </p>
+              <div className="mt-6 p-6 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/20 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-semibold flex items-center">
+                    <Upload className="h-5 w-5 mr-2 text-primary animate-pulse" />
+                    {uploadStage}
+                  </p>
+                  <span className="text-sm font-medium text-primary">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
                 <p className="text-xs text-muted-foreground">
                   Please wait while we securely encrypt and upload your data. This may take a moment depending on the amount of data being shared.
                 </p>
