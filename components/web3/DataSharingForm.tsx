@@ -16,6 +16,7 @@ import { pinataService } from '@/lib/web3/pinata';
 import { createAccessGrant, generateShareableLink } from '@/lib/web3/contract';
 import { FileUpload } from '@/components/ui/file-upload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 // Define the form schema
 const formSchema = z.object({
@@ -304,7 +305,12 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
           
           addLog(`Direct IPFS link generated: ${shareableLink}`);
           addLog('Process completed successfully!');
-          
+
+          // Show success toast
+          toast.success('Data shared successfully!', {
+            description: 'Your medical data has been securely uploaded to IPFS and is ready to share.',
+          });
+
           // Call success callback
           onSuccess(shareableLink, accessId);
         } else {
@@ -378,10 +384,15 @@ const DataSharingForm = ({ patientId, onSuccess }: DataSharingFormProps) => {
             console.error('Error saving to database:', apiError);
             // Continue with the process even if database save fails
           }
-          
+
+          // Show success toast
+          toast.success('Data shared successfully!', {
+            description: 'Your medical data has been securely uploaded and a shareable link has been generated.',
+          });
+
           // Call the onSuccess callback with the shareable link and access ID
           onSuccess(shareableLink, accessId);
-          
+
           addLog('Data sharing process completed successfully!');
         }
       } catch (ipfsError: any) {

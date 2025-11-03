@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Clipboard, Clock, Share2, FileText, Download } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getAccessGrantDetails } from '@/lib/web3/contract';
+import { toast } from 'sonner';
 
 interface ShareDisplayProps {
   shareableLink: string;
@@ -78,6 +79,11 @@ const ShareDisplay = ({ shareableLink, accessId }: ShareDisplayProps) => {
     navigator.clipboard.writeText(shareableLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+
+    // Show success toast
+    toast.success('Link copied!', {
+      description: 'The shareable link has been copied to your clipboard.',
+    });
   };
 
   return (

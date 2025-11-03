@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Clock, ExternalLink, Plus, Trash, RefreshCw } from 'lucide-react';
 import { ethers } from 'ethers';
+import { toast } from 'sonner';
 
 // Fetch shared records from the API
 const fetchSharedRecords = async (address?: string, forceRefresh = true) => {
@@ -90,10 +91,26 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
       // Pass the Ethereum address to the fetch function
       const records = await fetchSharedRecords(addressToUse, forceRefresh);
       console.log('Fetched shared records:', records);
-      
+
       if (records && Array.isArray(records)) {
         setSharedRecords(records);
         console.log(`Successfully loaded ${records.length} shared records`);
+
+        // Check for expiring shares (within 24 hours) and notify user
+        const now = new Date();
+        const expiringShares = records.filter((record: any) => {
+          if (!record.isActive) return false;
+          const expiryTime = new Date(record.expiryTime);
+          const timeUntilExpiry = expiryTime.getTime() - now.getTime();
+          const hoursUntilExpiry = timeUntilExpiry / (1000 * 60 * 60);
+          return hoursUntilExpiry > 0 && hoursUntilExpiry <= 24;
+        });
+
+        if (expiringShares.length > 0) {
+          toast.info('Shares expiring soon', {
+            description: `You have ${expiringShares.length} shared ${expiringShares.length === 1 ? 'item' : 'items'} expiring within 24 hours.`,
+          });
+        }
       } else {
         console.error('Received invalid data format from API:', records);
         setSharedRecords([]);
@@ -182,16 +199,23 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
       }
       
       // Update the UI by setting the record to inactive
-      setSharedRecords(prevRecords => 
-        prevRecords.map(record => 
+      setSharedRecords(prevRecords =>
+        prevRecords.map(record =>
           record.id === recordId ? { ...record, isActive: false } : record
         )
       );
-      
-      alert('Access successfully revoked');
+
+      // Show success toast
+      toast.success('Access revoked', {
+        description: 'The recipient can no longer access this shared data.',
+      });
     } catch (error) {
       console.error('Error revoking access:', error);
-      alert(`Failed to revoke access: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      // Show error toast
+      toast.error('Failed to revoke access', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
     }
   };
 
