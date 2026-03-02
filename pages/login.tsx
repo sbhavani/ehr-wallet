@@ -9,8 +9,8 @@ import { initDatabase } from '@/lib/db';
 import { seedOfflineDatabase } from '@/lib/seed-offline-db';
 import { useMetaMask } from '@/components/web3/MetaMaskProvider';
 import { notifications } from '@mantine/notifications';
-import { Card, Text, Title, TextInput, PasswordInput, Button, Divider, Stack, Center, Loader, Box } from '@mantine/core';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, Text, Title, TextInput, PasswordInput, Button, Divider, Stack, Center, Loader, Box, Group } from '@mantine/core';
+import { ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react';
 
 // Define the form schema
 const patientFormSchema = z.object({
@@ -28,6 +28,7 @@ export default function LoginPage() {
   const [initError, setInitError] = useState<string | null>(null);
   const [isMetaMaskLoading, setIsMetaMaskLoading] = useState(false);
   const [showEmailPasswordLogin, setShowEmailPasswordLogin] = useState(false);
+  const [showWalletAddress, setShowWalletAddress] = useState(false);
 
   // Form state
   const [email, setEmail] = useState('');
@@ -219,7 +220,19 @@ export default function LoginPage() {
               {currentAccount && (
                 <Box ta="center" mt="xs">
                   <Text size="sm" c="dimmed">Connected account:</Text>
-                  <Text size="xs" ff="monospace" style={{ wordBreak: 'break-all' }}>{currentAccount}</Text>
+                  <Group justify="center" gap="xs">
+                    <Text size="xs" ff="monospace" style={{ wordBreak: 'break-all' }}>
+                      {showWalletAddress ? currentAccount : `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`}
+                    </Text>
+                    <Button
+                      variant="subtle"
+                      size="xs"
+                      onClick={() => setShowWalletAddress(!showWalletAddress)}
+                      style={{ padding: 4, minWidth: 'auto' }}
+                    >
+                      {showWalletAddress ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </Button>
+                  </Group>
                 </Box>
               )}
 
