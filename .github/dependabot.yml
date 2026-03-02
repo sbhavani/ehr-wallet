@@ -14,3 +14,7 @@ updates:
       - "security"
     reviewers:
       - maintainers
+    # Ignore major version upgrades for helia (v6 is not compatible with Next.js webpack)
+    ignore:
+      - dependency-name: "helia"
+        update-types: ["major"]
