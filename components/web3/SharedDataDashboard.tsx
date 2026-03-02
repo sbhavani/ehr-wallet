@@ -13,24 +13,24 @@ import { toast } from 'sonner';
 // Fetch shared records from the API
 const fetchSharedRecords = async (address?: string, forceRefresh = true) => {
   try {
-    // Add the address as a query parameter if provided
-    // Add a timestamp to force cache busting
+    // Add timestamp to force cache busting
     const timestamp = new Date().getTime();
-    const url = address 
-      ? `/api/shared-data?address=${address}&_t=${timestamp}` 
-      : `/api/shared-data?_t=${timestamp}`;
-    
+    const url = `/api/shared-data?_t=${timestamp}`;
+
     console.log(`Fetching shared records from: ${url}`);
-    
+
+    // Build headers - include wallet address if available
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (address) {
+      headers['x-wallet-address'] = address;
+    }
+
     const response = await fetch(url, {
-      // Add cache: 'no-store' to prevent caching
       cache: 'no-store',
-      // Include credentials to send authentication cookies
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      // Add a timestamp to force a fresh request
+      headers,
       ...(forceRefresh ? { next: { revalidate: 0 }, signal: AbortSignal.timeout(30000) } : {})
     });
     

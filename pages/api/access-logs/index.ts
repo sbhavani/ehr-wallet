@@ -7,10 +7,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Require authentication for all requests
+  // Accept authentication via either NextAuth session OR wallet address header
   const session = await getServerSession(req, res, authOptions);
+  const walletAddress = req.headers['x-wallet-address'] as string | undefined;
+  const ethereumAddress = session?.user?.ethereumAddress || walletAddress?.toLowerCase();
 
-  if (!session || !session.user?.ethereumAddress) {
+  if (!ethereumAddress) {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
@@ -20,12 +22,7 @@ export default async function handler(
   }
 
   try {
-    // Use authenticated user's ethereum address
-    const user = {
-      ethereumAddress: session.user.ethereumAddress
-    };
-
-    console.log(`Fetching access logs for user with ethereum address: ${user.ethereumAddress}`);
+    console.log(`Fetching access logs for user with ethereum address: ${ethereumAddress}`);
     
     // For debugging, let's first check all shared data records in the database
     const allSharedData = await prisma.sharedMedicalData.findMany({
@@ -44,13 +41,13 @@ export default async function handler(
     // Get all ethereum addresses associated with this user (for testing purposes)
     // This helps if the user has multiple addresses or if there's a mismatch
     const possibleAddresses = [
-      user.ethereumAddress,
-      user.ethereumAddress?.toLowerCase(),
-      user.ethereumAddress?.toUpperCase(),
+      ethereumAddress,
+      ethereumAddress?.toLowerCase(),
+      ethereumAddress?.toUpperCase(),
     ].filter(Boolean) as string[];
-    
+
     console.log(`Found ${possibleAddresses.length} possible addresses for this user`);
-    
+
     // Fetch shared medical data records for this user with any of their addresses
     const sharedData = await prisma.sharedMedicalData.findMany({
       where: {
@@ -60,8 +57,8 @@ export default async function handler(
         createdAt: 'desc',
       },
     });
-    
-    console.log(`Found ${sharedData.length} records for address ${user.ethereumAddress}`);
+
+    console.log(`Found ${sharedData.length} records for address ${ethereumAddress}`);
     if (sharedData.length === 0 && allSharedData.length > 0) {
       // If no records were found for this user but there are records in the database,
       // let's use all records for testing purposes
