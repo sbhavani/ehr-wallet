@@ -9,12 +9,13 @@ import { AlertCircle, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
 
 export default function WalletPage() {
   const { data: session } = useSession();
-  const { 
-    connectWallet, 
-    isConnected, 
-    currentAccount, 
-    chainId, 
-    error 
+  const {
+    connectWallet,
+    isConnected,
+    currentAccount,
+    chainId,
+    networkName,
+    error
   } = useMetaMask();
   
   const [copied, setCopied] = useState(false);
@@ -27,8 +28,8 @@ export default function WalletPage() {
       if (storedPatientSession) {
         try {
           setPatientSession(JSON.parse(storedPatientSession));
-        } catch (error) {
-          console.error('Error parsing patient session:', error);
+        } catch {
+          // Ignore parse errors
         }
       }
     }
@@ -47,14 +48,19 @@ export default function WalletPage() {
     }
   };
   
-  // Function to view address on Etherscan
-  const viewOnEtherscan = () => {
+  // Function to view address on block explorer
+  const viewOnExplorer = () => {
     if (ethereumAddress) {
       // Use the appropriate network URL based on chainId
-      const baseUrl = chainId === '0x1' 
-        ? 'https://etherscan.io/address/' 
-        : 'https://sepolia.etherscan.io/address/';
-      
+      let baseUrl = 'https://etherscan.io/address/';
+      if (chainId === '0x89' || networkName === 'Polygon Mainnet') {
+        baseUrl = 'https://polygonscan.com/address/';
+      } else if (chainId === '0x13882' || networkName === 'Polygon Amoy') {
+        baseUrl = 'https://amoy.polygonscan.com/address/';
+      } else if (chainId === '0xaa36a7' || networkName === 'Sepolia') {
+        baseUrl = 'https://sepolia.etherscan.io/address/';
+      }
+
       window.open(`${baseUrl}${ethereumAddress}`, '_blank');
     }
   };
@@ -70,12 +76,12 @@ export default function WalletPage() {
       <div className="container max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-2">Wallet Connection</h1>
         <p className="text-muted-foreground mb-8">
-          Connect your Ethereum wallet to manage your medical data securely
+          Connect your wallet to manage your medical data securely
         </p>
-        
+
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Your Ethereum Wallet</CardTitle>
+            <CardTitle>Your Wallet</CardTitle>
             <CardDescription>
               Your wallet is used to securely share and manage access to your medical data
             </CardDescription>
@@ -110,7 +116,7 @@ export default function WalletPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={viewOnEtherscan}
+                      onClick={viewOnExplorer}
                       className="flex items-center gap-1"
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -121,11 +127,7 @@ export default function WalletPage() {
                 
                 <div>
                   <p className="text-sm font-medium mb-1">Network</p>
-                  <p className="text-sm">
-                    {chainId === '0x1' ? 'Ethereum Mainnet' : 
-                     chainId === '0xaa36a7' ? 'Sepolia Testnet' : 
-                     chainId ? `Chain ID: ${chainId}` : 'Unknown Network'}
-                  </p>
+                  <p className="text-sm">{networkName}</p>
                 </div>
               </div>
             ) : (
