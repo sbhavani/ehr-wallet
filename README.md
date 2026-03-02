@@ -2,7 +2,9 @@
 
 # EHR Wallet
 
-[![CI Status](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/ci.yml) [![Smart Contract Tests](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/smart-contract.yml)
+[![CI Status](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/ci.yml)
+[![Smart Contract Tests](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/smart-contract.yml/badge.svg)](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/smart-contract.yml)
+[![Dependency Security](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/dependency-security.yml/badge.svg)](https://github.com/openwallet-foundation-labs/ehr-wallet/actions/workflows/dependency-security.yml)
 
 ## Project Overview
 
