@@ -86,9 +86,32 @@ export const theme = createTheme({
       },
     },
     Tabs: {
+      defaultProps: {
+        variant: 'pills',
+        radius: 'lg',
+      },
       styles: {
+        root: {
+          gap: '8px',
+        },
         tab: {
-          fontWeight: 500,
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          padding: '12px 20px',
+          transition: 'all 200ms ease',
+          borderRadius: '8px',
+          '&:hover': {
+            backgroundColor: 'var(--mantine-color-teal-0)',
+            color: 'var(--mantine-color-teal-7)',
+          },
+          '&[data-active]': {
+            backgroundColor: 'var(--mantine-color-teal-6)',
+            color: 'white',
+            boxShadow: '0 2px 8px rgba(32, 201, 151, 0.4)',
+          },
+        },
+        list: {
+          borderBottom: 'none',
         },
       },
     },

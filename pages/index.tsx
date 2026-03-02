@@ -11,6 +11,7 @@ import SharedDataDashboard from '@/components/web3/SharedDataDashboard';
 import { initDatabase } from '@/lib/db';
 import { seedOfflineDatabase } from '@/lib/seed-offline-db';
 import { Center, Loader, Text, Stack, Button, Paper, Title, Group } from '@mantine/core';
+import { Share2, Heart, Calendar, FileText } from 'lucide-react';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -112,11 +113,11 @@ export default function Home() {
         </div>
 
         <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'shared-data')}>
-          <Tabs.List>
-            <Tabs.Tab value="shared-data">Shared Data</Tabs.Tab>
-            <Tabs.Tab value="health-data">Health Data</Tabs.Tab>
-            <Tabs.Tab value="appointments">Appointments</Tabs.Tab>
-            <Tabs.Tab value="medical-records">Medical Records</Tabs.Tab>
+          <Tabs.List grow>
+            <Tabs.Tab value="shared-data" leftSection={<Share2 size={18} />}>Shared Data</Tabs.Tab>
+            <Tabs.Tab value="health-data" leftSection={<Heart size={18} />}>Health Data</Tabs.Tab>
+            <Tabs.Tab value="appointments" leftSection={<Calendar size={18} />}>Appointments</Tabs.Tab>
+            <Tabs.Tab value="medical-records" leftSection={<FileText size={18} />}>Medical Records</Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="shared-data" pt="md">
