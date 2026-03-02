@@ -1,4 +1,4 @@
-import { createTheme, MantineColorsTuple } from '@mantine/core';
+import { createTheme, MantineColorsTuple, rem } from '@mantine/core';
 
 const teal: MantineColorsTuple = [
   '#e6fcf5',
@@ -32,15 +32,36 @@ export const theme = createTheme({
     teal,
     blue,
   },
-  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
   headings: {
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+    fontWeight: '600',
+    sizes: {
+      h1: { fontSize: '2.25rem', lineHeight: '1.2' },
+      h2: { fontSize: '1.875rem', lineHeight: '1.3' },
+      h3: { fontSize: '1.5rem', lineHeight: '1.4' },
+      h4: { fontSize: '1.25rem', lineHeight: '1.4' },
+      h5: { fontSize: '1.125rem', lineHeight: '1.5' },
+      h6: { fontSize: '1rem', lineHeight: '1.5' },
+    },
   },
   defaultRadius: 'md',
+  spacing: {
+    xs: rem(4),
+    sm: rem(8),
+    md: rem(16),
+    lg: rem(24),
+    xl: rem(32),
+  },
   components: {
     Button: {
       defaultProps: {
         radius: 'md',
+      },
+      styles: {
+        root: {
+          fontWeight: 500,
+        },
       },
     },
     Card: {
@@ -52,6 +73,23 @@ export const theme = createTheme({
     Input: {
       defaultProps: {
         radius: 'md',
+      },
+    },
+    TextInput: {
+      defaultProps: {
+        radius: 'md',
+      },
+    },
+    PasswordInput: {
+      defaultProps: {
+        radius: 'md',
+      },
+    },
+    Tabs: {
+      styles: {
+        tab: {
+          fontWeight: 500,
+        },
       },
     },
   },

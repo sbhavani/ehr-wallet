@@ -1,4 +1,5 @@
 import "@/lib/crypto-polyfill";
+import "@fontsource/inter";
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { SessionWrapper } from "@/components/SessionWrapper";
@@ -19,9 +20,11 @@ import { SessionProvider } from "next-auth/react";
 import "@/styles/globals.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 
 import { MetaMaskProvider } from "@/components/web3/MetaMaskProvider";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { theme } from "@/lib/theme";
 
 const queryClient = new QueryClient();
@@ -53,6 +56,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <SessionProvider session={pageProps.session}>
         <QueryClientProvider client={queryClient}>
           <MantineProvider theme={theme} defaultColorScheme="light">
+            <Notifications position="top-right" />
             <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
               <TooltipProvider>
                 {showSplash && isStandalone && <SplashScreen />}

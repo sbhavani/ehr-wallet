@@ -7,7 +7,7 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton, Group, Stack } from '@mantine/core';
 
 interface SessionWrapperProps {
   children: ReactNode;
@@ -39,12 +39,12 @@ export const SessionWrapper: FC<SessionWrapperProps> = ({ children }) => {
   // Show loading skeleton while checking auth
   if (!mounted || status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
+      <Group justify="center" align="center" style={{ minHeight: '100vh' }}>
+        <Stack align="center" gap="md">
+          <Skeleton height={48} width={48} circle />
+          <Skeleton height={16} width={128} />
+        </Stack>
+      </Group>
     );
   }
 

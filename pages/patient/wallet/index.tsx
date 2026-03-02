@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import PatientLayout from '@/components/layout/PatientLayout';
 import { useMetaMask } from '@/components/web3/MetaMaskProvider';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardSection, Text, Title, Button, Alert, Group, Stack } from '@mantine/core';
 import { AlertCircle, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
 
 export default function WalletPage() {
@@ -17,10 +15,10 @@ export default function WalletPage() {
     networkName,
     error
   } = useMetaMask();
-  
+
   const [copied, setCopied] = useState(false);
   const [patientSession, setPatientSession] = useState<any>(null);
-  
+
   // Get patient session from localStorage if using MetaMask
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -34,11 +32,11 @@ export default function WalletPage() {
       }
     }
   }, []);
-  
+
   // Determine which session to use (next-auth or MetaMask)
   const userSession = session || patientSession;
   const ethereumAddress = userSession?.user?.ethereumAddress || currentAccount;
-  
+
   // Function to copy address to clipboard
   const copyToClipboard = () => {
     if (ethereumAddress) {
@@ -47,7 +45,7 @@ export default function WalletPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-  
+
   // Function to view address on block explorer
   const viewOnExplorer = () => {
     if (ethereumAddress) {
@@ -64,7 +62,7 @@ export default function WalletPage() {
       window.open(`${baseUrl}${ethereumAddress}`, '_blank');
     }
   };
-  
+
   // Format address for display
   const formatAddress = (address: string) => {
     if (!address) return '';
@@ -74,71 +72,69 @@ export default function WalletPage() {
   return (
     <PatientLayout>
       <div className="container max-w-4xl mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-2">Wallet Connection</h1>
-        <p className="text-muted-foreground mb-8">
+        <Title order={1} mb="xs">Wallet Connection</Title>
+        <Text c="dimmed" mb="xl">
           Connect your wallet to manage your medical data securely
-        </p>
+        </Text>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Your Wallet</CardTitle>
-            <CardDescription>
+        <Card shadow="sm" padding="lg" radius="md" withBorder mb="xl">
+          <CardSection withBorder inheritPadding py="xs">
+            <Title order={3}>Your Wallet</Title>
+            <Text size="sm" c="dimmed">
               Your wallet is used to securely share and manage access to your medical data
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
+            </Text>
+          </CardSection>
+
+          <CardSection inheritPadding py="md">
             {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+              <Alert icon={<AlertCircle size={16} />} title="Error" color="red" mb="md">
+                {error}
               </Alert>
             )}
-            
+
             {isConnected ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">Connected Address</p>
-                    <p className="font-mono text-lg">{formatAddress(ethereumAddress || '')}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={copyToClipboard}
-                      className="flex items-center gap-1"
-                    >
-                      {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {copied ? 'Copied' : 'Copy'}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={viewOnExplorer}
-                      className="flex items-center gap-1"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      View
-                    </Button>
-                  </div>
-                </div>
-                
+              <Stack gap="md">
+                <Card shadow="xs" padding="md" radius="md" withBorder>
+                  <Group justify="space-between" align="flex-start">
+                    <div>
+                      <Text size="sm" fw={500}>Connected Address</Text>
+                      <Text size="lg" ff="monospace">{formatAddress(ethereumAddress || '')}</Text>
+                    </div>
+                    <Group gap="xs">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={copyToClipboard}
+                        leftSection={copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                      >
+                        {copied ? 'Copied' : 'Copy'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={viewOnExplorer}
+                        leftSection={<ExternalLink size={16} />}
+                      >
+                        View
+                      </Button>
+                    </Group>
+                  </Group>
+                </Card>
+
                 <div>
-                  <p className="text-sm font-medium mb-1">Network</p>
-                  <p className="text-sm">{networkName}</p>
+                  <Text size="sm" fw={500} mb={5}>Network</Text>
+                  <Text size="sm">{networkName}</Text>
                 </div>
-              </div>
+              </Stack>
             ) : (
-              <div className="text-center p-6">
-                <p className="mb-4">No wallet connected</p>
+              <Stack align="center" gap="md" py="xl">
+                <Text>No wallet connected</Text>
                 <Button onClick={connectWallet}>Connect MetaMask</Button>
-              </div>
+              </Stack>
             )}
-          </CardContent>
-          
-          <CardFooter className="flex justify-end">
+          </CardSection>
+
+          <CardSection withBorder inheritPadding py="xs" style={{ justifyContent: 'flex-end', display: 'flex' }}>
             {isConnected && (
               <Button variant="outline" onClick={() => {
                 // Manually clear the connection state since there's no disconnect method
@@ -147,39 +143,39 @@ export default function WalletPage() {
                 }
               }}>Disconnect Wallet</Button>
             )}
-          </CardFooter>
+          </CardSection>
         </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>About Blockchain Security</CardTitle>
-            <CardDescription>
+
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <CardSection withBorder inheritPadding py="xs">
+            <Title order={3}>About Blockchain Security</Title>
+            <Text size="sm" c="dimmed">
               How your medical data is secured with blockchain technology
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
-            <div className="space-y-4">
-              <p>
+            </Text>
+          </CardSection>
+
+          <CardSection inheritPadding py="md">
+            <Stack gap="md">
+              <Text>
                 Your medical data is secured using a combination of blockchain technology and decentralized storage:
-              </p>
-              
-              <ul className="list-disc pl-5 space-y-2">
+              </Text>
+
+              <ul style={{ listStyleType: 'disc', paddingLeft: '1.25rem', margin: 0 }}>
                 <li>
-                  <strong>Data Privacy:</strong> Your medical data is encrypted before being stored on IPFS (InterPlanetary File System).
+                  <Text fw={500}>Data Privacy:</Text> Your medical data is encrypted before being stored on IPFS (InterPlanetary File System).
                 </li>
                 <li>
-                  <strong>Access Control:</strong> Smart contracts on the Ethereum blockchain manage who can access your data.
+                  <Text fw={500}>Access Control:</Text> Smart contracts on the Ethereum blockchain manage who can access your data.
                 </li>
                 <li>
-                  <strong>Transparency:</strong> All data access requests are recorded on the blockchain, providing a transparent audit trail.
+                  <Text fw={500}>Transparency:</Text> All data access requests are recorded on the blockchain, providing a transparent audit trail.
                 </li>
                 <li>
-                  <strong>Security:</strong> Your private keys never leave your device, ensuring only you can grant access to your data.
+                  <Text fw={500}>Security:</Text> Your private keys never leave your device, ensuring only you can grant access to your data.
                 </li>
               </ul>
-            </div>
-          </CardContent>
+            </Stack>
+          </CardSection>
         </Card>
       </div>
     </PatientLayout>
