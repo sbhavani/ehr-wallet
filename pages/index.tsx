@@ -2,7 +2,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useCallback } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs } from '@mantine/core';
 import PatientLayout from '@/components/layout/PatientLayout';
 import { useMetaMask } from '@/components/web3/MetaMaskProvider';
 import AppleHealthConnect from '@/components/health/AppleHealthConnect';
@@ -10,7 +10,7 @@ import AppointmentsDashboard from '@/components/appointments/AppointmentsDashboa
 import SharedDataDashboard from '@/components/web3/SharedDataDashboard';
 import { initDatabase } from '@/lib/db';
 import { seedOfflineDatabase } from '@/lib/seed-offline-db';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Center, Loader, Text, Stack, Button, Paper, Title, Group } from '@mantine/core';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -31,7 +31,7 @@ export default function Home() {
         await initDatabase();
         await seedOfflineDatabase();
         setDbInitializing(false);
-      } catch (error) {
+      } catch {
         setInitError('Failed to initialize the offline database. Please reload the page.');
         setDbInitializing(false);
       }
@@ -79,79 +79,76 @@ export default function Home() {
 
   if (dbInitializing) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4 text-center">
-          <h1 className="text-2xl font-bold">Initializing...</h1>
-          <p className="text-muted-foreground">Please wait while we set up your local database.</p>
-          <div className="flex justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          </div>
-        </div>
-      </div>
+      <Center h="100vh">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text size="lg" fw={500}>Initializing...</Text>
+          <Text c="dimmed">Please wait while we set up your local database.</Text>
+        </Stack>
+      </Center>
     );
   }
 
   if (initError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4 text-center">
-          <h1 className="text-2xl font-bold text-red-500">Database Error</h1>
-          <p className="text-muted-foreground">{initError}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-          >
+      <Center h="100vh">
+        <Stack align="center" gap="md">
+          <Text size="xl" c="red" fw={600}>Database Error</Text>
+          <Text c="dimmed">{initError}</Text>
+          <Button onClick={() => window.location.reload()}>
             Reload Page
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Stack>
+      </Center>
     );
   }
 
   return (
     <PatientLayout>
-      <div className="container max-w-7xl mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-2">Patient Dashboard</h1>
-        <p className="text-muted-foreground mb-8">
-          Welcome back, {userName}
-        </p>
+      <Stack gap="xl" py="xl">
+        <div>
+          <Title order={1}>Patient Dashboard</Title>
+          <Text c="dimmed">Welcome back, {userName}</Text>
+        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="shared-data">Shared Data</TabsTrigger>
-            <TabsTrigger value="health-data">Health Data</TabsTrigger>
-            <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'shared-data')}>
+          <Tabs.List>
+            <Tabs.Tab value="shared-data">Shared Data</Tabs.Tab>
+            <Tabs.Tab value="health-data">Health Data</Tabs.Tab>
+            <Tabs.Tab value="appointments">Appointments</Tabs.Tab>
+            <Tabs.Tab value="medical-records">Medical Records</Tabs.Tab>
+          </Tabs.List>
 
-          <TabsContent value="shared-data" className="mt-0">
+          <Tabs.Panel value="shared-data" pt="md">
             <SharedDataDashboard
               key={`shared-data-${refreshKey}`}
               ethereumAddress={ethereumAddress}
             />
-          </TabsContent>
+          </Tabs.Panel>
 
-          <TabsContent value="health-data" className="mt-0">
+          <Tabs.Panel value="health-data" pt="md">
             <AppleHealthConnect />
-          </TabsContent>
+          </Tabs.Panel>
 
-          <TabsContent value="appointments" className="mt-0">
+          <Tabs.Panel value="appointments" pt="md">
             <AppointmentsDashboard
               key={`appointments-${refreshKey}`}
               patientId={userSession?.user?.id || 'default-patient-id'}
             />
-          </TabsContent>
+          </Tabs.Panel>
 
-          <TabsContent value="medical-records" className="mt-0">
-            <div className="bg-muted p-8 rounded-lg text-center">
-              <h3 className="text-lg font-medium mb-2">Medical Records Coming Soon</h3>
-              <p className="text-muted-foreground">
-                This feature is under development. You&apos;ll be able to view your medical records here.
-              </p>
-            </div>
-          </TabsContent>
+          <Tabs.Panel value="medical-records" pt="md">
+            <Paper p="xl" bg="gray.0" radius="md">
+              <Stack align="center" gap="sm">
+                <Title order={3}>Medical Records Coming Soon</Title>
+                <Text c="dimmed">
+                  This feature is under development. You&apos;ll be able to view your medical records here.
+                </Text>
+              </Stack>
+            </Paper>
+          </Tabs.Panel>
         </Tabs>
-      </div>
+      </Stack>
     </PatientLayout>
   );
 }

@@ -17,11 +17,13 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import dynamic from "next/dynamic";
 import { SessionProvider } from "next-auth/react";
 import "@/styles/globals.css";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 
-// Temporarily use regular import to debug dynamic import issue
 import { MetaMaskProvider } from "@/components/web3/MetaMaskProvider";
+import { MantineProvider, ColorSchemeScript } from "@mantine/core";
+import { theme } from "@/lib/theme";
 
-// Create a client
 const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -29,7 +31,6 @@ export default function App({ Component, pageProps }: AppProps) {
   const { isStandalone } = usePWA();
 
   useEffect(() => {
-    // Only show splash screen briefly
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2000);
@@ -47,37 +48,34 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="apple-mobile-web-app-title" content="GlobalRad" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <ColorSchemeScript defaultColorScheme="light" />
       </Head>
       <SessionProvider session={pageProps.session}>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
-            <TooltipProvider>
-            {/* Show splash screen only on initial load when in standalone mode */}
-            {showSplash && isStandalone && <SplashScreen />}
-            
-            {/* Show offline indicator when needed */}
-            <OfflineIndicator />
-            
-            {/* Show update notification when available */}
-            <UpdateNotification />
-            
-            {/* Main content with SessionWrapper, AppLayout and MetaMaskProvider */}
-            <SessionWrapper>
-              <AppLayout>
-                <MetaMaskProvider>
-                  <Component {...pageProps} />
-                </MetaMaskProvider>
-              </AppLayout>
-            </SessionWrapper>
-            
-            {/* Show install prompt when appropriate */}
-            <InstallPrompt />
-            
-            {/* UI components */}
-            <Toaster />
-            <Sonner />
-            </TooltipProvider>
-          </ThemeProvider>
+          <MantineProvider theme={theme} defaultColorScheme="light">
+            <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
+              <TooltipProvider>
+                {showSplash && isStandalone && <SplashScreen />}
+
+                <OfflineIndicator />
+
+                <UpdateNotification />
+
+                <SessionWrapper>
+                  <AppLayout>
+                    <MetaMaskProvider>
+                      <Component {...pageProps} />
+                    </MetaMaskProvider>
+                  </AppLayout>
+                </SessionWrapper>
+
+                <InstallPrompt />
+
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </ThemeProvider>
+          </MantineProvider>
         </QueryClientProvider>
       </SessionProvider>
     </>
