@@ -8,15 +8,37 @@ interface MetaMaskContextType {
   isConnected: boolean;
   currentAccount: string | null;
   chainId: string | null;
+  networkName: string;
   connectWallet: () => Promise<string | null>;
   error: string | null;
 }
+
+// Helper to get network name from chainId
+const getNetworkName = (chainId: string | null): string => {
+  if (!chainId) return 'Unknown';
+  const chainIdNum = parseInt(chainId, 16);
+  switch (chainIdNum) {
+    case 137:
+      return 'Polygon Mainnet';
+    case 80002:
+      return 'Polygon Amoy';
+    case 1:
+      return 'Ethereum Mainnet';
+    case 11155111:
+      return 'Sepolia';
+    case 5:
+      return 'Goerli';
+    default:
+      return `Chain ${chainIdNum}`;
+  }
+};
 
 const MetaMaskContext = createContext<MetaMaskContextType>({
   isMetaMaskInstalled: false,
   isConnected: false,
   currentAccount: null,
   chainId: null,
+  networkName: 'Unknown',
   connectWallet: async () => null,
   error: null,
 });
@@ -176,6 +198,7 @@ export const MetaMaskProvider = ({ children }: MetaMaskProviderProps) => {
     isConnected,
     currentAccount,
     chainId,
+    networkName: getNetworkName(chainId),
     connectWallet,
     error,
   };

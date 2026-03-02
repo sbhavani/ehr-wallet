@@ -45,7 +45,7 @@ export default function LoginPage() {
   const [showEmailPasswordLogin, setShowEmailPasswordLogin] = useState(false);
   
   // Get MetaMask context for wallet integration
-  const { isMetaMaskInstalled, currentAccount, connectWallet, isConnected, error: metaMaskError } = useMetaMask();
+  const { isMetaMaskInstalled, currentAccount, connectWallet, isConnected, networkName, error: metaMaskError } = useMetaMask();
   
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function LoginPage() {
                 {/* Web3 Wallet Login - First */}
                 <div className="mb-6">
                   <h3 className="text-sm font-medium mb-3">Web3 Wallet Login</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Connect with your Ethereum wallet to access your medical records</p>
+                  <p className="text-xs text-muted-foreground mb-4">Connect with your wallet to access your medical records</p>
                   
                   {/* MetaMask Login Button */}
                   <Button 
@@ -213,8 +213,10 @@ export default function LoginPage() {
                   )}
                   
                   <div className="mt-2 text-center text-xs text-muted-foreground bg-muted p-2 rounded">
-                    <p>For demo: use MetaMask with the Ethereum Sepolia testnet</p>
-                    <p className="mt-1">You can get test ETH from the <a href="https://sepoliafaucet.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Sepolia Faucet</a></p>
+                    <p>Current network: {networkName}</p>
+                    {currentAccount && (
+                      <p className="mt-1">Wallet connected</p>
+                    )}
                   </div>
                 </div>
                 
