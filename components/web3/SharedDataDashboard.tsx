@@ -332,7 +332,7 @@ const SharedDataDashboard = ({ ethereumAddress }: SharedDataDashboardProps) => {
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground">
-          Your data is securely stored on IPFS and access is managed by an Ethereum smart contract
+          Your data is securely stored on IPFS and access is managed by a blockchain smart contract
         </p>
       </CardFooter>
     </Card>

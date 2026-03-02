@@ -319,7 +319,7 @@ export default function SharedDataPage() {
             </CardContent>
             <CardFooter>
               <p className="text-xs text-muted-foreground">
-                This data is securely stored on IPFS and access is managed by an Ethereum smart contract
+                This data is securely stored on IPFS and access is managed by a blockchain smart contract
               </p>
             </CardFooter>
           </Card>
