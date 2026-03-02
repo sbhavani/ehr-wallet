@@ -72,21 +72,6 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
     loadAppointments();
   }, [patientId]);
 
-  // Debug logging to check appointment data
-  useEffect(() => {
-    console.log('AppointmentList - appointments:', appointments);
-    console.log('AppointmentList - appointments length:', appointments.length);
-    if (appointments.length > 0) {
-      console.log('AppointmentList - first appointment:', appointments[0]);
-      console.log('AppointmentList - first appointment startTime:', appointments[0].startTime);
-      console.log('AppointmentList - first appointment startTime type:', typeof appointments[0].startTime);
-      console.log('AppointmentList - startTime toString:', appointments[0].startTime?.toString());
-      console.log('AppointmentList - startTime valueOf:', appointments[0].startTime?.valueOf());
-      console.log('AppointmentList - new Date(startTime):', new Date(appointments[0].startTime));
-      console.log('AppointmentList - isNaN check:', isNaN(new Date(appointments[0].startTime).getTime()));
-    }
-  }, [appointments]);
-
   const loadAppointments = async () => {
     try {
       setLoading(true);
@@ -119,8 +104,8 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
       );
 
       setAppointments(enrichedAppointments);
-    } catch (error) {
-      console.error('Error loading appointments:', error);
+    } catch {
+      // Ignore errors - component will show empty state
     } finally {
       setLoading(false);
     }

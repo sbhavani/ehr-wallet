@@ -41,28 +41,17 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
-  // Debug logging
-  console.log('AppointmentCalendar currentDate:', currentDate);
-  console.log('AppointmentCalendar currentDate string:', currentDate.toString());
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
   // Get appointments for the current month
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  
+
   const { appointments, loading, refreshAppointments } = useAppointments(patientId, {
     dateFrom: monthStart,
     dateTo: monthEnd
   });
-
-  // Debug logging for calendar
-  console.log('AppointmentCalendar - loading:', loading);
-  console.log('AppointmentCalendar - appointments:', appointments);
-  console.log('AppointmentCalendar - appointments length:', appointments.length);
-  console.log('AppointmentCalendar - monthStart:', monthStart);
-  console.log('AppointmentCalendar - monthEnd:', monthEnd);
 
   // Get all days in the current month
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
