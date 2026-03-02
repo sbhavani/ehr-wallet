@@ -5,44 +5,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Clock, ExternalLink, ShieldAlert, Eye } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import PatientLayout from '@/components/layout/PatientLayout';
-
-// Temporarily use regular import to debug dynamic import issue
-import { MetaMaskProvider } from '@/components/web3/MetaMaskProvider';
-
-// We'll fetch real data from the API
+import { useMetaMask } from '@/components/web3/MetaMaskProvider';
 
 export default function AccessLogsPage() {
   const { data: session } = useSession();
+  const { currentAccount } = useMetaMask();
   const [accessLogs, setAccessLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
-
-  // Check if MetaMask is installed
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsMetaMaskInstalled(Boolean(window.ethereum?.isMetaMask));
-    }
-  }, []);
 
   // Load access logs directly from the database
   useEffect(() => {
     const fetchAccessLogs = async () => {
       try {
         setLoading(true);
-        
-        // Directly fetch all shared data records from the database
-        const response = await fetch('/api/shared-data?all=true');
-        
+
+        // Build headers with wallet address if available
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        if (currentAccount) {
+          headers['x-wallet-address'] = currentAccount;
+        }
+
+        const response = await fetch('/api/shared-data?all=true', { headers });
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch access logs');
         }
-        
+
         const sharedData = await response.json();
-        
+
         // Transform the shared data into access logs format
         const logs = sharedData.map((data: any) => {
           const dataTypes = data.dataTypes ? data.dataTypes.split(',') : [];
@@ -57,11 +52,9 @@ export default function AccessLogsPage() {
             pinStatus: 'pinned'
           };
         });
-        
-        console.log('Transformed access logs:', logs);
+
         setAccessLogs(logs);
       } catch (err: any) {
-        console.error('Error fetching access logs:', err);
         setError(err.message || 'Failed to fetch access logs');
       } finally {
         setLoading(false);
@@ -69,7 +62,7 @@ export default function AccessLogsPage() {
     };
 
     fetchAccessLogs();
-  }, []);
+  }, [currentAccount]);
 
   // Format data types for display
   const formatDataTypes = (types: string[]) => {
