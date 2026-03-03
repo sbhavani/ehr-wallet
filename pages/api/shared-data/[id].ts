@@ -87,7 +87,6 @@ async function updateSharedData(
   ethereumAddress: string
 ) {
   try {
-    console.log(`Updating shared data record ${id}`, req.body);
 
     // Find the shared data record first
     const existingData = await prisma.sharedMedicalData.findUnique({

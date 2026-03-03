@@ -55,14 +55,11 @@ async function getSharedData(
       },
     });
 
-    console.log(`Total shared data records in database: ${allRecords.length}`);
     if (allRecords.length > 0) {
-      console.log('Sample record:', JSON.stringify(allRecords[0]));
     }
 
     // If all=true parameter is provided, return all records
     if (returnAllRecords) {
-      console.log('Returning all shared data records for access logs');
       return res.status(200).json(allRecords);
     }
 
@@ -70,7 +67,6 @@ async function getSharedData(
     // Normalize the ethereum address to lowercase for consistency
     const normalizedAddress = ethereumAddress.toLowerCase();
 
-    console.log(`Fetching shared data for address: ${normalizedAddress}`);
 
     // Query the database for shared data records for the authenticated user only
     const sharedData = await prisma.sharedMedicalData.findMany({
@@ -82,7 +78,6 @@ async function getSharedData(
       },
     });
 
-    console.log(`Found ${sharedData.length} records for address ${normalizedAddress}`);
 
     return res.status(200).json(sharedData);
   } catch (error) {
@@ -106,7 +101,6 @@ async function createSharedData(
       dataTypes
     } = req.body;
 
-    console.log('Creating shared data record with:', { accessId, ipfsCid, expiryTime, hasPassword });
 
     // Validate required fields
     if (!accessId || !ipfsCid || !expiryTime) {
@@ -130,7 +124,6 @@ async function createSharedData(
       },
     });
 
-    console.log('Successfully created shared data record:', sharedData.id);
 
     return res.status(201).json(sharedData);
   } catch (error) {

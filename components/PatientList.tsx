@@ -67,7 +67,6 @@ const PatientList = () => {
         // Implement retry logic (max 3 retries with exponential backoff)
         if (retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 500; // 500ms, 1000ms, 2000ms
-          console.log(`Retrying fetch in ${delay}ms (attempt ${retryCount + 1}/3)`);
 
           setTimeout(() => {
             fetchPatients(retryCount + 1);

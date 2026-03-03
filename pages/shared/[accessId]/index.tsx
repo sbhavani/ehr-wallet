@@ -124,7 +124,6 @@ export default function SharedDataPage() {
         });
 
         if (recordResponse.ok) {
-          console.log('Access recorded successfully');
         } else {
           console.warn('Failed to record access:', await recordResponse.json());
         }

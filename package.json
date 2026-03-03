@@ -136,6 +136,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "next-test-api-route-handler": "^4.0.16",
+    "playwright": "^1.58.2",
     "postcss": "^8.5.3",
     "puppeteer": "^24.10.2",
     "solidity-coverage": "^0.8.16",

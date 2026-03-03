@@ -22,7 +22,6 @@ export default async function handler(
   }
 
   try {
-    console.log(`Fetching access logs for user with ethereum address: ${ethereumAddress}`);
     
     // For debugging, let's first check all shared data records in the database
     const allSharedData = await prisma.sharedMedicalData.findMany({
@@ -33,9 +32,7 @@ export default async function handler(
       take: 10, // Limit to 10 records for debugging
     });
     
-    console.log(`Total shared data records in database: ${allSharedData.length}`);
     if (allSharedData.length > 0) {
-      console.log('Sample record:', JSON.stringify(allSharedData[0]));
     }
     
     // Get all ethereum addresses associated with this user (for testing purposes)
@@ -46,7 +43,6 @@ export default async function handler(
       ethereumAddress?.toUpperCase(),
     ].filter(Boolean) as string[];
 
-    console.log(`Found ${possibleAddresses.length} possible addresses for this user`);
 
     // Fetch shared medical data records for this user with any of their addresses
     const sharedData = await prisma.sharedMedicalData.findMany({
@@ -58,11 +54,9 @@ export default async function handler(
       },
     });
 
-    console.log(`Found ${sharedData.length} records for address ${ethereumAddress}`);
     if (sharedData.length === 0 && allSharedData.length > 0) {
       // If no records were found for this user but there are records in the database,
       // let's use all records for testing purposes
-      console.log('Using all records for testing purposes');
       return res.status(200).json(allSharedData.map(data => {
         const dataTypes = data.dataTypes ? data.dataTypes.split(',') : [];
         return {
